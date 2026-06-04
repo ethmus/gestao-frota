@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>U2 — Fetch API | Gestão de Frota</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Segoe UI', Arial, sans-serif; background: #f0f4f8; color: #1a202c; }
+
+    .topbar {
+      background: #1E3A8A;
+      color: white;
+      padding: 0.8rem 1.5rem;
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+    .topbar a { color: #93c5fd; font-size: 0.85rem; text-decoration: none; }
+    .topbar a:hover { text-decoration: underline; }
+    .topbar span { color: white; font-weight: 600; }
+    .unidade-badge {
+      background: #1E88E5;
+      color: white;
+      font-size: 0.75rem;
+      padding: 0.2rem 0.7rem;
+      border-radius: 999px;
+      margin-left: auto;
+    }
+
+    .explicacao {
+      background: #EBF4FF;
+      border-left: 4px solid #1E88E5;
+      padding: 1rem 1.5rem;
+      font-size: 0.9rem;
+      color: #1a365d;
+      line-height: 1.6;
+    }
+
+    .app {
+      max-width: 860px;
+      margin: 2rem auto;
+      padding: 0 1rem;
+    }
+
+    .app-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1.5rem;
+    }
+
+    .app-header h1 { font-size: 1.4rem; color: #1E3A8A; }
+
+    .btn {
+      background: #1E88E5;
+      color: white;
+      border: none;
+      padding: 0.6rem 1.2rem;
+      border-radius: 6px;
+      font-size: 0.9rem;
+      cursor: pointer;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background: white;
+      border-radius: 8px;
+      overflow: hidden;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+    }
+
+    thead { background: #1E3A8A; color: white; }
+    thead th { padding: 0.9rem 1rem; text-align: left; font-size: 0.85rem; }
+    tbody tr { border-bottom: 1px solid #e2e8f0; }
+    tbody tr:last-child { border: none; }
+    tbody td { padding: 0.85rem 1rem; font-size: 0.9rem; }
+
+    .status {
+      display: inline-block;
+      padding: 0.2rem 0.6rem;
+      border-radius: 999px;
+      font-size: 0.75rem;
+      font-weight: 600;
+    }
+    .ativo { background: #D1FAE5; color: #065F46; }
+    .manutencao { background: #FEF3C7; color: #92400E; }
+    .inativo { background: #FEE2E2; color: #991B1B; }
+
+    .loading {
+      text-align: center;
+      padding: 2rem;
+      color: #718096;
+      font-size: 0.9rem;
+    }
+
+    .erro {
+      background: #FEE2E2;
+      border: 1px solid #FCA5A5;
+      border-radius: 6px;
+      padding: 1rem;
+      color: #991B1B;
+      font-size: 0.88rem;
+      margin-top: 1rem;
+    }
+
+    .code-block {
+      background: #1e293b;
+      color: #e2e8f0;
+      border-radius: 8px;
+      padding: 1.2rem;
+      font-family: 'Consolas', monospace;
+      font-size: 0.82rem;
+      line-height: 1.7;
+      margin-top: 1.5rem;
+      overflow-x: auto;
+    }
+
+    .code-block .comment { color: #64748b; }
+    .code-block .keyword { color: #7dd3fc; }
+    .code-block .string { color: #86efac; }
+    .code-block .fn { color: #fbbf24; }
+  </style>
+</head>
+<body>
+
+<div class="topbar">
+  <a href="../index.html">← Voltar ao início</a>
+  <span>Unidade 2 — Fetch API</span>
+  <span class="unidade-badge">JavaScript + Fetch</span>
+</div>
+
+<div class="explicacao">
+  <strong>O que mudou em relação à U1:</strong> o HTML não tem mais dados escritos nele.
+  O JavaScript usa <code>fetch()</code> para buscar os veículos no servidor e montar a tabela dinamicamente.
+  Abra o DevTools (F12 → Network) para ver a requisição acontecer.
+</div>
+
+<div class="app">
+  <div class="app-header">
+    <h1>🚛 Veículos da Frota</h1>
+    <button class="btn" onclick="carregarVeiculos()">↻ Recarregar</button>
+  </div>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Placa</th>
+        <th>Modelo</th>
+        <th>Ano</th>
+        <th>Km Atual</th>
+        <th>Status</th>
+      </tr>
+    </thead>
+    <tbody id="tbody-veiculos">
+      <tr>
+        <td colspan="5" class="loading">Carregando veículos...</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="code-block">
+    <span class="comment">// O código que faz isso acontecer (veja no fonte da página)</span><br>
+    <span class="keyword">async function</span> <span class="fn">carregarVeiculos</span>() {<br>
+    &nbsp;&nbsp;<span class="keyword">const</span> resposta = <span class="keyword">await</span> <span class="fn">fetch</span>(<span class="string">'https://gestao-frota-api.up.railway.app/api/v1/veiculos'</span>);<br>
+    &nbsp;&nbsp;<span class="keyword">const</span> veiculos = <span class="keyword">await</span> resposta.<span class="fn">json</span>();<br>
+    &nbsp;&nbsp;<span class="comment">// para cada veículo, cria uma linha na tabela</span><br>
+    }
+  </div>
+</div>
+
+<script>
+  const API = 'https://gestao-frota-api.up.railway.app/api/v1';
+
+  function statusBadge(status) {
+    const map = {
+      'ativo': 'ativo',
+      'manutenção': 'manutencao',
+      'manutencao': 'manutencao',
+      'inativo': 'inativo'
+    };
+    const cls = map[status?.toLowerCase()] || 'inativo';
+    const label = status?.charAt(0).toUpperCase() + status?.slice(1) || '—';
+    return `<span class="status ${cls}">${label}</span>`;
+  }
+
+  async function carregarVeiculos() {
+    const tbody = document.getElementById('tbody-veiculos');
+    tbody.innerHTML = '<tr><td colspan="5" class="loading">Carregando...</td></tr>';
+
+    try {
+      const resposta = await fetch(`${API}/veiculos`);
+      if (!resposta.ok) throw new Error(`Servidor retornou ${resposta.status}`);
+      const veiculos = await resposta.json();
+
+      if (veiculos.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="5" class="loading">Nenhum veículo cadastrado.</td></tr>';
+        return;
+      }
+
+      tbody.innerHTML = veiculos.map(v => `
+        <tr>
+          <td>${v.placa}</td>
+          <td>${v.modelo}</td>
+          <td>${v.ano}</td>
+          <td>${Number(v.km_atual).toLocaleString('pt-BR')} km</td>
+          <td>${statusBadge(v.status)}</td>
+        </tr>
+      `).join('');
+
+    } catch (err) {
+      tbody.innerHTML = `
+        <tr>
+          <td colspan="5">
+            <div class="erro">
+              ⚠️ Não foi possível conectar à API: <strong>${err.message}</strong><br>
+              <small>Verifique se o back-end está em execução no Railway.</small>
+            </div>
+          </td>
+        </tr>
+      `;
+    }
+  }
+
+  carregarVeiculos();
+</script>
+
+</body>
+</html>

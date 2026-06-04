@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Gestão de Frota — DW2 IFCE</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'Segoe UI', Arial, sans-serif;
+      background: #f0f4f8;
+      color: #1a202c;
+    }
+
+    header {
+      background: #1E3A8A;
+      color: white;
+      padding: 2rem;
+      text-align: center;
+    }
+
+    header h1 { font-size: 2rem; margin-bottom: 0.5rem; }
+    header p { font-size: 1rem; opacity: 0.85; }
+
+    .badge {
+      display: inline-block;
+      background: #1E88E5;
+      color: white;
+      font-size: 0.75rem;
+      padding: 0.2rem 0.7rem;
+      border-radius: 999px;
+      margin-top: 0.5rem;
+    }
+
+    main {
+      max-width: 900px;
+      margin: 2rem auto;
+      padding: 0 1rem;
+    }
+
+    .intro {
+      background: white;
+      border-left: 4px solid #1E88E5;
+      padding: 1.2rem 1.5rem;
+      border-radius: 4px;
+      margin-bottom: 2rem;
+      font-size: 0.97rem;
+      line-height: 1.7;
+    }
+
+    h2 {
+      font-size: 1.1rem;
+      color: #1E3A8A;
+      margin-bottom: 1rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 1.2rem;
+      margin-bottom: 2rem;
+    }
+
+    .card {
+      background: white;
+      border-radius: 8px;
+      padding: 1.4rem;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+      border-top: 4px solid #1E88E5;
+      text-decoration: none;
+      color: inherit;
+      display: block;
+      transition: transform 0.15s, box-shadow 0.15s;
+    }
+
+    .card:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.12);
+    }
+
+    .card .unidade {
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: #1E88E5;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin-bottom: 0.4rem;
+    }
+
+    .card h3 {
+      font-size: 1rem;
+      margin-bottom: 0.5rem;
+      color: #1E3A8A;
+    }
+
+    .card p {
+      font-size: 0.88rem;
+      color: #4a5568;
+      line-height: 1.5;
+    }
+
+    .card .tags {
+      margin-top: 0.8rem;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.4rem;
+    }
+
+    .tag {
+      background: #EBF4FF;
+      color: #1E88E5;
+      font-size: 0.72rem;
+      padding: 0.2rem 0.5rem;
+      border-radius: 4px;
+    }
+
+    footer {
+      text-align: center;
+      padding: 2rem;
+      font-size: 0.82rem;
+      color: #718096;
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>🚛 Sistema de Gestão de Frota</h1>
+  <p>Projeto demonstrativo da disciplina Desenvolvimento Web 2</p>
+  <span class="badge">IFCE — Informática para Internet (EAD)</span>
+</header>
+
+<main>
+  <div class="intro">
+    Este projeto foi construído unidade por unidade, seguindo exatamente o conteúdo da disciplina DW2.
+    Se você acompanhou cada aula e realizou as atividades, você é capaz de construir este sistema do zero.
+    Explore cada unidade abaixo para ver o resultado de cada etapa.
+  </div>
+
+  <h2>Unidades do Projeto</h2>
+
+  <div class="grid">
+
+    <a class="card" href="u1/index.html">
+      <div class="unidade">Unidade 1</div>
+      <h3>Interface Estática</h3>
+      <p>Tela de listagem de veículos construída com HTML e CSS puro. Sem lógica, sem dados reais — só estrutura e visual.</p>
+      <div class="tags">
+        <span class="tag">HTML</span>
+        <span class="tag">CSS</span>
+      </div>
+    </a>
+
+    <a class="card" href="u2/index.html">
+      <div class="unidade">Unidade 2</div>
+      <h3>Consumindo uma API</h3>
+      <p>A mesma tela agora busca dados reais com Fetch API. Os veículos vêm do servidor — a interface apenas exibe.</p>
+      <div class="tags">
+        <span class="tag">JavaScript</span>
+        <span class="tag">Fetch API</span>
+        <span class="tag">JSON</span>
+      </div>
+    </a>
+
+    <a class="card" href="u3/index.html">
+      <div class="unidade">Unidade 3</div>
+      <h3>Servidor Node.js Puro</h3>
+      <p>Como o servidor funciona por dentro — sem framework, respondendo requisições HTTP manualmente.</p>
+      <div class="tags">
+        <span class="tag">Node.js</span>
+        <span class="tag">HTTP</span>
+      </div>
+    </a>
+
+    <a class="card" href="u4/index.html">
+      <div class="unidade">Unidade 4</div>
+      <h3>API REST com Express</h3>
+      <p>O servidor refatorado com Express. Rotas limpas, verbos HTTP corretos, status codes adequados.</p>
+      <div class="tags">
+        <span class="tag">Express</span>
+        <span class="tag">REST</span>
+        <span class="tag">CRUD</span>
+      </div>
+    </a>
+
+    <a class="card" href="u5/index.html">
+      <div class="unidade">Unidade 5</div>
+      <h3>Integração com Banco de Dados</h3>
+      <p>Sistema completo: front-end → Fetch → API REST → mysql2 → frota_db. Dados reais, persistência real.</p>
+      <div class="tags">
+        <span class="tag">MySQL</span>
+        <span class="tag">mysql2</span>
+        <span class="tag">MVC</span>
+      </div>
+    </a>
+
+  </div>
+</main>
+
+<footer>
+  IFCE · Informática para Internet EAD · Desenvolvimento Web 2
+</footer>
+
+</body>
+</html>

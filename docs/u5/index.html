@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>U5 — Sistema Completo | Gestão de Frota</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Segoe UI', Arial, sans-serif; background: #f0f4f8; color: #1a202c; }
+
+    .topbar {
+      background: #1E3A8A; color: white;
+      padding: 0.8rem 1.5rem;
+      display: flex; align-items: center; gap: 1rem;
+    }
+    .topbar a { color: #93c5fd; font-size: 0.85rem; text-decoration: none; }
+    .topbar span { color: white; font-weight: 600; }
+    .unidade-badge {
+      background: #1E88E5; color: white;
+      font-size: 0.75rem; padding: 0.2rem 0.7rem;
+      border-radius: 999px; margin-left: auto;
+    }
+
+    .explicacao {
+      background: #EBF4FF; border-left: 4px solid #1E88E5;
+      padding: 1rem 1.5rem; font-size: 0.9rem; color: #1a365d; line-height: 1.6;
+    }
+
+    .app { max-width: 900px; margin: 2rem auto; padding: 0 1rem; }
+
+    .tabs { display: flex; gap: 0.5rem; margin-bottom: 1.5rem; flex-wrap: wrap; }
+
+    .tab {
+      background: white; border: 2px solid #e2e8f0;
+      border-radius: 6px; padding: 0.5rem 1rem;
+      font-size: 0.88rem; cursor: pointer;
+      transition: all 0.15s;
+    }
+    .tab.ativo { background: #1E3A8A; border-color: #1E3A8A; color: white; }
+
+    .painel { display: none; }
+    .painel.ativo { display: block; }
+
+    .app-header {
+      display: flex; justify-content: space-between;
+      align-items: center; margin-bottom: 1rem;
+    }
+    .app-header h2 { font-size: 1.2rem; color: #1E3A8A; text-transform: none; letter-spacing: 0; }
+
+    .btn {
+      background: #1E88E5; color: white;
+      border: none; padding: 0.55rem 1.1rem;
+      border-radius: 6px; font-size: 0.88rem; cursor: pointer;
+    }
+    .btn-danger { background: #EF4444; }
+    .btn-sm { padding: 0.3rem 0.7rem; font-size: 0.78rem; }
+
+    table {
+      width: 100%; border-collapse: collapse;
+      background: white; border-radius: 8px;
+      overflow: hidden; box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+    }
+    thead { background: #1E3A8A; color: white; }
+    thead th { padding: 0.8rem 1rem; text-align: left; font-size: 0.82rem; }
+    tbody tr { border-bottom: 1px solid #e2e8f0; }
+    tbody tr:last-child { border: none; }
+    tbody td { padding: 0.75rem 1rem; font-size: 0.88rem; }
+
+    .status { display: inline-block; padding: 0.2rem 0.6rem; border-radius: 999px; font-size: 0.72rem; font-weight: 600; }
+    .ativo { background: #D1FAE5; color: #065F46; }
+    .manutencao { background: #FEF3C7; color: #92400E; }
+    .inativo { background: #FEE2E2; color: #991B1B; }
+
+    .loading { text-align: center; padding: 1.5rem; color: #718096; font-size: 0.88rem; }
+
+    .modal-overlay {
+      display: none; position: fixed; inset: 0;
+      background: rgba(0,0,0,0.5); z-index: 100;
+      align-items: center; justify-content: center;
+    }
+    .modal-overlay.visivel { display: flex; }
+
+    .modal {
+      background: white; border-radius: 10px;
+      padding: 1.5rem; width: 100%; max-width: 440px;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+    }
+    .modal h3 { font-size: 1rem; color: #1E3A8A; margin-bottom: 1rem; }
+
+    label { display: block; font-size: 0.82rem; color: #4a5568; margin-bottom: 0.2rem; }
+    input, select {
+      width: 100%; border: 1px solid #CBD5E0;
+      border-radius: 6px; padding: 0.5rem 0.8rem;
+      font-size: 0.88rem; margin-bottom: 0.8rem;
+    }
+    input:focus, select:focus { outline: none; border-color: #1E88E5; }
+
+    .modal-actions { display: flex; gap: 0.6rem; justify-content: flex-end; margin-top: 0.5rem; }
+    .btn-cancel { background: #e2e8f0; color: #4a5568; border: none; padding: 0.55rem 1.1rem; border-radius: 6px; cursor: pointer; font-size: 0.88rem; }
+
+    .arquitetura {
+      background: #1e293b; color: #e2e8f0;
+      border-radius: 8px; padding: 1.2rem;
+      font-family: 'Consolas', monospace; font-size: 0.82rem; line-height: 1.8;
+      margin-top: 1.5rem;
+    }
+    .comment { color: #64748b; }
+    .keyword { color: #7dd3fc; }
+    .string { color: #86efac; }
+    .fn { color: #fbbf24; }
+  </style>
+</head>
+<body>
+
+<div class="topbar">
+  <a href="../index.html">← Voltar ao início</a>
+  <span>Unidade 5 — Sistema Completo</span>
+  <span class="unidade-badge">MySQL + MVC</span>
+</div>
+
+<div class="explicacao">
+  <strong>Sistema completo:</strong> front-end → Fetch API → Express → mysql2 → frota_db.
+  Os dados são reais e persistentes. Cadastre, edite e exclua — as alterações ficam no banco.
+</div>
+
+<div class="app">
+
+  <div class="tabs">
+    <button class="tab ativo" onclick="mudarTab('veiculos', this)">🚛 Veículos</button>
+    <button class="tab" onclick="mudarTab('motoristas', this)">👤 Motoristas</button>
+    <button class="tab" onclick="mudarTab('oficinas', this)">🔧 Oficinas</button>
+  </div>
+
+  <!-- VEÍCULOS -->
+  <div class="painel ativo" id="painel-veiculos">
+    <div class="app-header">
+      <h2>Veículos</h2>
+      <button class="btn" onclick="abrirModal('veiculo')">+ Novo Veículo</button>
+    </div>
+    <table>
+      <thead>
+        <tr><th>Placa</th><th>Modelo</th><th>Ano</th><th>Km</th><th>Status</th><th></th></tr>
+      </thead>
+      <tbody id="tbody-veiculos">
+        <tr><td colspan="6" class="loading">Carregando...</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- MOTORISTAS -->
+  <div class="painel" id="painel-motoristas">
+    <div class="app-header">
+      <h2>Motoristas</h2>
+      <button class="btn" onclick="abrirModal('motorista')">+ Novo Motorista</button>
+    </div>
+    <table>
+      <thead>
+        <tr><th>Nome</th><th>CNH</th><th>Categoria</th><th>Validade CNH</th><th></th></tr>
+      </thead>
+      <tbody id="tbody-motoristas">
+        <tr><td colspan="5" class="loading">Carregando...</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- OFICINAS -->
+  <div class="painel" id="painel-oficinas">
+    <div class="app-header">
+      <h2>Oficinas</h2>
+      <button class="btn" onclick="abrirModal('oficina')">+ Nova Oficina</button>
+    </div>
+    <table>
+      <thead>
+        <tr><th>Nome</th><th>Cidade</th><th>Telefone</th><th>Especialidade</th><th></th></tr>
+      </thead>
+      <tbody id="tbody-oficinas">
+        <tr><td colspan="5" class="loading">Carregando...</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="arquitetura" style="margin-top:2rem">
+    <span class="comment">// Fluxo completo — Unidade 5</span><br>
+    <span class="comment">// FRONT-END (GitHub Pages)</span><br>
+    &nbsp;&nbsp;<span class="fn">fetch</span>(<span class="string">'https://gestao-frota-api.up.railway.app/api/v1/veiculos'</span>)<br>
+    &nbsp;&nbsp;&nbsp;&nbsp;→ <span class="comment">// HTTP GET</span><br>
+    <span class="comment">// BACK-END (Railway)</span><br>
+    &nbsp;&nbsp;veiculoRoutes.js → veiculoController.js → veiculoModel.js<br>
+    &nbsp;&nbsp;&nbsp;&nbsp;→ <span class="comment">// mysql2/promise</span><br>
+    <span class="comment">// BANCO DE DADOS (Railway MySQL)</span><br>
+    &nbsp;&nbsp;<span class="keyword">SELECT</span> * <span class="keyword">FROM</span> VEICULO;<br>
+    &nbsp;&nbsp;&nbsp;&nbsp;→ <span class="comment">// JSON de volta ao front</span>
+  </div>
+
+</div>
+
+<!-- MODAL VEÍCULO -->
+<div class="modal-overlay" id="modal-veiculo">
+  <div class="modal">
+    <h3>Novo Veículo</h3>
+    <label>Placa</label>
+    <input type="text" id="v-placa" placeholder="ABC-1234" maxlength="8">
+    <label>Modelo</label>
+    <input type="text" id="v-modelo" placeholder="Fiat Ducato">
+    <label>Ano</label>
+    <input type="number" id="v-ano" placeholder="2022" min="1990" max="2030">
+    <label>Km Atual</label>
+    <input type="number" id="v-km" placeholder="0">
+    <label>Status</label>
+    <select id="v-status">
+      <option value="ativo">Ativo</option>
+      <option value="manutencao">Manutenção</option>
+      <option value="inativo">Inativo</option>
+    </select>
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="fecharModal('veiculo')">Cancelar</button>
+      <button class="btn" onclick="salvarVeiculo()">Salvar</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  const API = 'https://gestao-frota-api.up.railway.app/api/v1';
+
+  function statusBadge(s) {
+    const map = { 'ativo': 'ativo', 'manutenção': 'manutencao', 'manutencao': 'manutencao', 'inativo': 'inativo' };
+    const cls = map[s?.toLowerCase()] || 'inativo';
+    return `<span class="status ${cls}">${s}</span>`;
+  }
+
+  async function carregarVeiculos() {
+    const tbody = document.getElementById('tbody-veiculos');
+    try {
+      const res = await fetch(`${API}/veiculos`);
+      const veiculos = await res.json();
+      tbody.innerHTML = veiculos.map(v => `
+        <tr>
+          <td>${v.placa}</td>
+          <td>${v.modelo}</td>
+          <td>${v.ano}</td>
+          <td>${Number(v.km_atual).toLocaleString('pt-BR')} km</td>
+          <td>${statusBadge(v.status)}</td>
+          <td><button class="btn btn-danger btn-sm" onclick="excluirVeiculo('${v.placa}')">Excluir</button></td>
+        </tr>
+      `).join('') || '<tr><td colspan="6" class="loading">Nenhum veículo.</td></tr>';
+    } catch {
+      tbody.innerHTML = '<tr><td colspan="6" class="loading">Erro ao conectar à API.</td></tr>';
+    }
+  }
+
+  async function carregarMotoristas() {
+    const tbody = document.getElementById('tbody-motoristas');
+    try {
+      const res = await fetch(`${API}/motoristas`);
+      const lista = await res.json();
+      tbody.innerHTML = lista.map(m => `
+        <tr>
+          <td>${m.nome}</td>
+          <td>${m.cnh}</td>
+          <td>${m.categoria_cnh}</td>
+          <td>${m.validade_cnh}</td>
+          <td><button class="btn btn-danger btn-sm" onclick="excluirMotorista(${m.id})">Excluir</button></td>
+        </tr>
+      `).join('') || '<tr><td colspan="5" class="loading">Nenhum motorista.</td></tr>';
+    } catch {
+      tbody.innerHTML = '<tr><td colspan="5" class="loading">Erro ao conectar à API.</td></tr>';
+    }
+  }
+
+  async function carregarOficinas() {
+    const tbody = document.getElementById('tbody-oficinas');
+    try {
+      const res = await fetch(`${API}/oficinas`);
+      const lista = await res.json();
+      tbody.innerHTML = lista.map(o => `
+        <tr>
+          <td>${o.nome}</td>
+          <td>${o.cidade}</td>
+          <td>${o.telefone}</td>
+          <td>${o.especialidade}</td>
+          <td><button class="btn btn-danger btn-sm" onclick="excluirOficina(${o.id})">Excluir</button></td>
+        </tr>
+      `).join('') || '<tr><td colspan="5" class="loading">Nenhuma oficina.</td></tr>';
+    } catch {
+      tbody.innerHTML = '<tr><td colspan="5" class="loading">Erro ao conectar à API.</td></tr>';
+    }
+  }
+
+  async function excluirVeiculo(placa) {
+    if (!confirm(`Excluir veículo ${placa}?`)) return;
+    await fetch(`${API}/veiculos/${placa}`, { method: 'DELETE' });
+    carregarVeiculos();
+  }
+
+  async function excluirMotorista(id) {
+    if (!confirm('Excluir motorista?')) return;
+    await fetch(`${API}/motoristas/${id}`, { method: 'DELETE' });
+    carregarMotoristas();
+  }
+
+  async function excluirOficina(id) {
+    if (!confirm('Excluir oficina?')) return;
+    await fetch(`${API}/oficinas/${id}`, { method: 'DELETE' });
+    carregarOficinas();
+  }
+
+  async function salvarVeiculo() {
+    const body = {
+      placa: document.getElementById('v-placa').value,
+      modelo: document.getElementById('v-modelo').value,
+      ano: parseInt(document.getElementById('v-ano').value),
+      km_atual: parseInt(document.getElementById('v-km').value),
+      status: document.getElementById('v-status').value
+    };
+    await fetch(`${API}/veiculos`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body)
+    });
+    fecharModal('veiculo');
+    carregarVeiculos();
+  }
+
+  function mudarTab(tab, el) {
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('ativo'));
+    document.querySelectorAll('.painel').forEach(p => p.classList.remove('ativo'));
+    el.classList.add('ativo');
+    document.getElementById(`painel-${tab}`).classList.add('ativo');
+    if (tab === 'veiculos') carregarVeiculos();
+    if (tab === 'motoristas') carregarMotoristas();
+    if (tab === 'oficinas') carregarOficinas();
+  }
+
+  function abrirModal(tipo) {
+    document.getElementById(`modal-${tipo}`).classList.add('visivel');
+  }
+
+  function fecharModal(tipo) {
+    document.getElementById(`modal-${tipo}`).classList.remove('visivel');
+  }
+
+  carregarVeiculos();
+</script>
+
+</body>
+</html>

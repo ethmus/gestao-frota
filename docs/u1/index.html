@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>U1 — Interface Estática | Gestão de Frota</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Segoe UI', Arial, sans-serif; background: #f0f4f8; color: #1a202c; }
+
+    .topbar {
+      background: #1E3A8A;
+      color: white;
+      padding: 0.8rem 1.5rem;
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+    .topbar a { color: #93c5fd; font-size: 0.85rem; text-decoration: none; }
+    .topbar a:hover { text-decoration: underline; }
+    .topbar span { color: white; font-weight: 600; }
+
+    .unidade-badge {
+      background: #1E88E5;
+      color: white;
+      font-size: 0.75rem;
+      padding: 0.2rem 0.7rem;
+      border-radius: 999px;
+      margin-left: auto;
+    }
+
+    .explicacao {
+      background: #EBF4FF;
+      border-left: 4px solid #1E88E5;
+      padding: 1rem 1.5rem;
+      font-size: 0.9rem;
+      color: #1a365d;
+      line-height: 1.6;
+    }
+
+    .app {
+      max-width: 860px;
+      margin: 2rem auto;
+      padding: 0 1rem;
+    }
+
+    .app-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1.5rem;
+    }
+
+    .app-header h1 { font-size: 1.4rem; color: #1E3A8A; }
+
+    .btn {
+      background: #1E88E5;
+      color: white;
+      border: none;
+      padding: 0.6rem 1.2rem;
+      border-radius: 6px;
+      font-size: 0.9rem;
+      cursor: pointer;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background: white;
+      border-radius: 8px;
+      overflow: hidden;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+    }
+
+    thead { background: #1E3A8A; color: white; }
+    thead th { padding: 0.9rem 1rem; text-align: left; font-size: 0.85rem; }
+    tbody tr { border-bottom: 1px solid #e2e8f0; }
+    tbody tr:last-child { border: none; }
+    tbody td { padding: 0.85rem 1rem; font-size: 0.9rem; }
+
+    .status {
+      display: inline-block;
+      padding: 0.2rem 0.6rem;
+      border-radius: 999px;
+      font-size: 0.75rem;
+      font-weight: 600;
+    }
+    .ativo { background: #D1FAE5; color: #065F46; }
+    .manutencao { background: #FEF3C7; color: #92400E; }
+    .inativo { background: #FEE2E2; color: #991B1B; }
+
+    .nota {
+      background: #FFFBEB;
+      border: 1px solid #FCD34D;
+      border-radius: 6px;
+      padding: 1rem 1.2rem;
+      margin-top: 1.5rem;
+      font-size: 0.85rem;
+      color: #78350F;
+      line-height: 1.6;
+    }
+  </style>
+</head>
+<body>
+
+<div class="topbar">
+  <a href="../index.html">← Voltar ao início</a>
+  <span>Unidade 1 — Interface Estática</span>
+  <span class="unidade-badge">HTML + CSS</span>
+</div>
+
+<div class="explicacao">
+  <strong>O que foi feito nesta unidade:</strong> estrutura HTML semântica, estilização com CSS puro, tabela de dados com status visual.
+  Os dados estão escritos diretamente no HTML — sem JavaScript, sem servidor, sem banco de dados.
+</div>
+
+<div class="app">
+  <div class="app-header">
+    <h1>🚛 Veículos da Frota</h1>
+    <button class="btn">+ Novo Veículo</button>
+  </div>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Placa</th>
+        <th>Modelo</th>
+        <th>Ano</th>
+        <th>Km Atual</th>
+        <th>Status</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>ABC-1234</td>
+        <td>Fiat Ducato</td>
+        <td>2021</td>
+        <td>48.200 km</td>
+        <td><span class="status ativo">Ativo</span></td>
+      </tr>
+      <tr>
+        <td>DEF-5678</td>
+        <td>Mercedes Sprinter</td>
+        <td>2019</td>
+        <td>112.400 km</td>
+        <td><span class="status manutencao">Manutenção</span></td>
+      </tr>
+      <tr>
+        <td>GHI-9012</td>
+        <td>Volkswagen Delivery</td>
+        <td>2022</td>
+        <td>21.800 km</td>
+        <td><span class="status ativo">Ativo</span></td>
+      </tr>
+      <tr>
+        <td>JKL-3456</td>
+        <td>Ford Cargo</td>
+        <td>2017</td>
+        <td>198.000 km</td>
+        <td><span class="status inativo">Inativo</span></td>
+      </tr>
+      <tr>
+        <td>MNO-7890</td>
+        <td>Iveco Daily</td>
+        <td>2020</td>
+        <td>67.300 km</td>
+        <td><span class="status ativo">Ativo</span></td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="nota">
+    ⚠️ <strong>Observe:</strong> esses dados estão escritos diretamente no HTML. Se você inspecionar o código-fonte da página,
+    vai encontrar cada linha da tabela como texto estático. Na Unidade 2, esses mesmos dados virão de um servidor.
+  </div>
+</div>
+
+</body>
+</html>

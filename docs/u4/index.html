@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>U4 — REST + Express | Gestão de Frota</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Segoe UI', Arial, sans-serif; background: #f0f4f8; color: #1a202c; }
+
+    .topbar {
+      background: #1E3A8A; color: white;
+      padding: 0.8rem 1.5rem;
+      display: flex; align-items: center; gap: 1rem;
+    }
+    .topbar a { color: #93c5fd; font-size: 0.85rem; text-decoration: none; }
+    .topbar span { color: white; font-weight: 600; }
+    .unidade-badge {
+      background: #1E88E5; color: white;
+      font-size: 0.75rem; padding: 0.2rem 0.7rem;
+      border-radius: 999px; margin-left: auto;
+    }
+
+    .explicacao {
+      background: #EBF4FF; border-left: 4px solid #1E88E5;
+      padding: 1rem 1.5rem; font-size: 0.9rem; color: #1a365d; line-height: 1.6;
+    }
+
+    .app { max-width: 860px; margin: 2rem auto; padding: 0 1rem; }
+
+    h2 { font-size: 1rem; color: #1E3A8A; margin: 1.5rem 0 0.8rem; text-transform: uppercase; letter-spacing: 0.05em; }
+
+    .rotas { display: flex; flex-direction: column; gap: 0.6rem; margin-bottom: 1.5rem; }
+
+    .rota {
+      background: white; border-radius: 6px;
+      padding: 0.8rem 1rem;
+      display: flex; align-items: center; gap: 0.8rem;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.07);
+      cursor: pointer; transition: box-shadow 0.15s;
+    }
+    .rota:hover { box-shadow: 0 3px 8px rgba(0,0,0,0.12); }
+
+    .metodo {
+      font-family: 'Consolas', monospace; font-size: 0.78rem;
+      font-weight: 700; padding: 0.2rem 0.5rem;
+      border-radius: 4px; min-width: 52px; text-align: center;
+    }
+    .GET    { background: #D1FAE5; color: #065F46; }
+    .POST   { background: #DBEAFE; color: #1E40AF; }
+    .PUT    { background: #FEF3C7; color: #92400E; }
+    .DELETE { background: #FEE2E2; color: #991B1B; }
+
+    .rota-path { font-family: 'Consolas', monospace; font-size: 0.88rem; color: #334155; }
+    .rota-desc { font-size: 0.82rem; color: #64748b; margin-left: auto; }
+
+    .resposta {
+      background: #1e293b; color: #e2e8f0;
+      border-radius: 8px; padding: 1.2rem;
+      font-family: 'Consolas', monospace; font-size: 0.82rem; line-height: 1.7;
+      min-height: 80px; display: none;
+      margin-bottom: 1.5rem;
+    }
+    .resposta.visivel { display: block; }
+
+    .code-block {
+      background: #1e293b; color: #e2e8f0;
+      border-radius: 8px; padding: 1.2rem;
+      font-family: 'Consolas', monospace; font-size: 0.82rem; line-height: 1.8;
+      overflow-x: auto; margin-bottom: 1rem;
+    }
+    .comment { color: #64748b; }
+    .keyword { color: #7dd3fc; }
+    .string { color: #86efac; }
+    .fn { color: #fbbf24; }
+    .number { color: #f9a8d4; }
+  </style>
+</head>
+<body>
+
+<div class="topbar">
+  <a href="../index.html">← Voltar ao início</a>
+  <span>Unidade 4 — REST + Express</span>
+  <span class="unidade-badge">Express</span>
+</div>
+
+<div class="explicacao">
+  <strong>Clique em qualquer rota</strong> para ver a resposta real da API.
+  Compare com o código da U3 — o Express elimina o <code>if/else</code> e organiza tudo em rotas declarativas.
+</div>
+
+<div class="app">
+
+  <h2>Endpoints disponíveis</h2>
+
+  <div class="rotas">
+    <div class="rota" onclick="testar('GET', '/api/v1/veiculos', this)">
+      <span class="metodo GET">GET</span>
+      <span class="rota-path">/api/v1/veiculos</span>
+      <span class="rota-desc">Lista todos os veículos</span>
+    </div>
+    <div class="rota" onclick="testar('GET', '/api/v1/veiculos/ABC-1234', this)">
+      <span class="metodo GET">GET</span>
+      <span class="rota-path">/api/v1/veiculos/:placa</span>
+      <span class="rota-desc">Busca veículo pela placa</span>
+    </div>
+    <div class="rota" onclick="testar('GET', '/api/v1/motoristas', this)">
+      <span class="metodo GET">GET</span>
+      <span class="rota-path">/api/v1/motoristas</span>
+      <span class="rota-desc">Lista todos os motoristas</span>
+    </div>
+    <div class="rota" onclick="testar('GET', '/api/v1/oficinas', this)">
+      <span class="metodo GET">GET</span>
+      <span class="rota-path">/api/v1/oficinas</span>
+      <span class="rota-desc">Lista todas as oficinas</span>
+    </div>
+  </div>
+
+  <div class="resposta" id="resposta-box"></div>
+
+  <h2>Como o Express organiza isso</h2>
+
+  <div class="code-block">
+<span class="comment">// app.js — Front Controller</span><br>
+<span class="keyword">const</span> express = <span class="fn">require</span>(<span class="string">'express'</span>);<br>
+<span class="keyword">const</span> app = <span class="fn">express</span>();<br>
+app.<span class="fn">use</span>(express.<span class="fn">json</span>());<br>
+<br>
+app.<span class="fn">use</span>(<span class="string">'/api/v1/veiculos'</span>, <span class="fn">require</span>(<span class="string">'./routes/veiculoRoutes'</span>));<br>
+app.<span class="fn">use</span>(<span class="string">'/api/v1/motoristas'</span>, <span class="fn">require</span>(<span class="string">'./routes/motoristaRoutes'</span>));<br>
+app.<span class="fn">use</span>(<span class="string">'/api/v1/oficinas'</span>, <span class="fn">require</span>(<span class="string">'./routes/oficinaRoutes'</span>));<br>
+<br>
+app.<span class="fn">listen</span>(<span class="number">3000</span>);
+  </div>
+
+  <div class="code-block">
+<span class="comment">// routes/veiculoRoutes.js</span><br>
+<span class="keyword">const</span> router = <span class="fn">require</span>(<span class="string">'express'</span>).<span class="fn">Router</span>();<br>
+<span class="keyword">const</span> ctrl = <span class="fn">require</span>(<span class="string">'../controllers/veiculoController'</span>);<br>
+<br>
+router.<span class="fn">get</span>(<span class="string">'/'</span>, ctrl.listar);<br>
+router.<span class="fn">get</span>(<span class="string">'/:placa'</span>, ctrl.buscarPorPlaca);<br>
+router.<span class="fn">post</span>(<span class="string">'/'</span>, ctrl.criar);<br>
+router.<span class="fn">put</span>(<span class="string">'/:placa'</span>, ctrl.atualizar);<br>
+router.<span class="fn">delete</span>(<span class="string">'/:placa'</span>, ctrl.remover);<br>
+<br>
+module.exports = router;
+  </div>
+
+</div>
+
+<script>
+  const API = 'https://gestao-frota-api.up.railway.app';
+  let rotaAtiva = null;
+
+  async function testar(metodo, path, el) {
+    if (rotaAtiva) rotaAtiva.style.background = 'white';
+    rotaAtiva = el;
+    el.style.background = '#EBF4FF';
+
+    const box = document.getElementById('resposta-box');
+    box.classList.add('visivel');
+    box.textContent = '⏳ Aguardando resposta...';
+
+    try {
+      const res = await fetch(API + path);
+      const data = await res.json();
+      box.textContent = `// HTTP ${res.status}\n${JSON.stringify(data, null, 2)}`;
+    } catch (err) {
+      box.textContent = `// Erro: ${err.message}\n// Verifique se o back-end está online no Railway.`;
+    }
+  }
+</script>
+
+</body>
+</html>
