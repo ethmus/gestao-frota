@@ -3,174 +3,370 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>U4 — REST + Express | Gestão de Frota</title>
+  <title>Etapa 4 — A API toma forma | Gestão de Frota DW2</title>
+  <link rel="stylesheet" href="../style.css">
   <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-    body { font-family: 'Segoe UI', Arial, sans-serif; background: #f0f4f8; color: #1a202c; }
-
-    .topbar {
-      background: #1E3A8A; color: white;
-      padding: 0.8rem 1.5rem;
-      display: flex; align-items: center; gap: 1rem;
+    .rest-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.82rem;
+      margin: 1rem 0;
     }
-    .topbar a { color: #93c5fd; font-size: 0.85rem; text-decoration: none; }
-    .topbar span { color: white; font-weight: 600; }
-    .unidade-badge {
-      background: #1E88E5; color: white;
-      font-size: 0.75rem; padding: 0.2rem 0.7rem;
-      border-radius: 999px; margin-left: auto;
+    .rest-table th {
+      font-family: var(--mono);
+      font-size: 0.62rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      padding: 0.6rem 0.8rem;
+      text-align: left;
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+      color: var(--text-dim);
     }
-
-    .explicacao {
-      background: #EBF4FF; border-left: 4px solid #1E88E5;
-      padding: 1rem 1.5rem; font-size: 0.9rem; color: #1a365d; line-height: 1.6;
+    .rest-table td {
+      padding: 0.6rem 0.8rem;
+      border-bottom: 1px solid rgba(255,255,255,0.04);
+      vertical-align: top;
     }
+    .rest-table tr:hover td { background: rgba(255,255,255,0.02); }
+    .method-badge {
+      font-family: var(--mono);
+      font-size: 0.65rem;
+      font-weight: 600;
+      padding: 0.15rem 0.45rem;
+      border-radius: 3px;
+      letter-spacing: 0.05em;
+    }
+    .GET    { background: rgba(82,201,122,0.15);  color: #52C97A; }
+    .POST   { background: rgba(78,205,196,0.15);  color: #4ECDC4; }
+    .PUT    { background: rgba(201,168,76,0.15);  color: #C9A84C; }
+    .DELETE { background: rgba(224,82,82,0.15);   color: #E05252; }
 
-    .app { max-width: 860px; margin: 2rem auto; padding: 0 1rem; }
-
-    h2 { font-size: 1rem; color: #1E3A8A; margin: 1.5rem 0 0.8rem; text-transform: uppercase; letter-spacing: 0.05em; }
-
-    .rotas { display: flex; flex-direction: column; gap: 0.6rem; margin-bottom: 1.5rem; }
-
-    .rota {
-      background: white; border-radius: 6px;
+    .endpoint-tester {
+      background: rgba(11,22,40,0.9);
+      border: 1px solid rgba(78,205,196,0.2);
+      border-radius: var(--radius);
+      overflow: hidden;
+      margin: 1.5rem 0;
+    }
+    .endpoint-tester .et-header {
+      background: rgba(15,31,61,0.8);
+      border-bottom: 1px solid rgba(255,255,255,0.06);
       padding: 0.8rem 1rem;
-      display: flex; align-items: center; gap: 0.8rem;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.07);
-      cursor: pointer; transition: box-shadow 0.15s;
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
     }
-    .rota:hover { box-shadow: 0 3px 8px rgba(0,0,0,0.12); }
-
-    .metodo {
-      font-family: 'Consolas', monospace; font-size: 0.78rem;
-      font-weight: 700; padding: 0.2rem 0.5rem;
-      border-radius: 4px; min-width: 52px; text-align: center;
+    .et-select {
+      background: rgba(201,168,76,0.1);
+      border: 1px solid rgba(201,168,76,0.3);
+      color: var(--gold);
+      font-family: var(--mono);
+      font-size: 0.72rem;
+      padding: 0.3rem 0.6rem;
+      border-radius: 4px;
+      cursor: pointer;
+      margin: 0;
+      width: auto;
     }
-    .GET    { background: #D1FAE5; color: #065F46; }
-    .POST   { background: #DBEAFE; color: #1E40AF; }
-    .PUT    { background: #FEF3C7; color: #92400E; }
-    .DELETE { background: #FEE2E2; color: #991B1B; }
-
-    .rota-path { font-family: 'Consolas', monospace; font-size: 0.88rem; color: #334155; }
-    .rota-desc { font-size: 0.82rem; color: #64748b; margin-left: auto; }
-
-    .resposta {
-      background: #1e293b; color: #e2e8f0;
-      border-radius: 8px; padding: 1.2rem;
-      font-family: 'Consolas', monospace; font-size: 0.82rem; line-height: 1.7;
-      min-height: 80px; display: none;
-      margin-bottom: 1.5rem;
+    .et-url {
+      flex: 1;
+      font-family: var(--mono);
+      font-size: 0.72rem;
+      color: var(--text-dim);
+      background: rgba(255,255,255,0.04);
+      padding: 0.3rem 0.7rem;
+      border-radius: 4px;
+      margin: 0;
     }
-    .resposta.visivel { display: block; }
-
-    .code-block {
-      background: #1e293b; color: #e2e8f0;
-      border-radius: 8px; padding: 1.2rem;
-      font-family: 'Consolas', monospace; font-size: 0.82rem; line-height: 1.8;
-      overflow-x: auto; margin-bottom: 1rem;
+    .et-response {
+      padding: 1rem;
+      font-family: var(--mono);
+      font-size: 0.75rem;
+      color: var(--text-dim);
+      line-height: 1.7;
+      min-height: 80px;
+      white-space: pre;
+      overflow-x: auto;
     }
-    .comment { color: #64748b; }
-    .keyword { color: #7dd3fc; }
-    .string { color: #86efac; }
-    .fn { color: #fbbf24; }
-    .number { color: #f9a8d4; }
+
+    .before-after {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+      margin: 1rem 0;
+    }
+    @media(max-width:600px) { .before-after { grid-template-columns: 1fr; } }
+
+    .status-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+      gap: 0.5rem;
+      margin: 1rem 0;
+    }
+    .status-item {
+      background: rgba(15,31,61,0.6);
+      border: 1px solid rgba(255,255,255,0.06);
+      border-radius: var(--radius);
+      padding: 0.7rem;
+      text-align: center;
+    }
+    .status-code {
+      font-family: var(--mono);
+      font-size: 1.1rem;
+      font-weight: 500;
+      margin-bottom: 0.2rem;
+    }
+    .status-text {
+      font-family: var(--mono);
+      font-size: 0.6rem;
+      letter-spacing: 0.05em;
+      color: var(--text-dim);
+    }
+    .s2xx { color: var(--green); }
+    .s3xx { color: var(--cyan); }
+    .s4xx { color: var(--gold); }
+    .s5xx { color: var(--red); }
   </style>
 </head>
 <body>
 
-<div class="topbar">
-  <a href="../index.html">← Voltar ao início</a>
-  <span>Unidade 4 — REST + Express</span>
-  <span class="unidade-badge">Express</span>
-</div>
+<nav class="topbar">
+  <a href="../index.html" class="topbar-brand">← Gestão de Frota</a>
+  <span class="topbar-sep">/</span>
+  <span class="topbar-title">Etapa 04</span>
+  <span class="topbar-tag">REST · Express · Rotas</span>
+</nav>
 
-<div class="explicacao">
-  <strong>Clique em qualquer rota</strong> para ver a resposta real da API.
-  Compare com o código da U3 — o Express elimina o <code>if/else</code> e organiza tudo em rotas declarativas.
-</div>
+<section class="unit-hero">
+  <div class="unit-number reveal">Etapa 04 de 08</div>
+  <h1 class="reveal reveal-1">A API <em>toma forma</em></h1>
+  <p class="lead reveal reveal-2">
+    Na etapa anterior, sentimos a dor do Node.js puro. Agora chegou o alívio: Express.
+    Com ele, as rotas ficam declarativas, o body chega pronto, e a API começa a ter uma linguagem — REST.
+    Verbos HTTP mapeiam para ações. URLs identificam recursos. Status codes comunicam resultados.
+  </p>
+  <div class="concepts reveal reveal-3">
+    <span class="concept-tag node">Express</span>
+    <span class="concept-tag node">REST</span>
+    <span class="concept-tag node">GET / POST / PUT / DELETE</span>
+    <span class="concept-tag node">Status Codes</span>
+    <span class="concept-tag node">Rotas</span>
+  </div>
+</section>
 
-<div class="app">
+<div class="content">
 
-  <h2>Endpoints disponíveis</h2>
-
-  <div class="rotas">
-    <div class="rota" onclick="testar('GET', '/api/v1/veiculos', this)">
-      <span class="metodo GET">GET</span>
-      <span class="rota-path">/api/v1/veiculos</span>
-      <span class="rota-desc">Lista todos os veículos</span>
-    </div>
-    <div class="rota" onclick="testar('GET', '/api/v1/veiculos/ABC-1234', this)">
-      <span class="metodo GET">GET</span>
-      <span class="rota-path">/api/v1/veiculos/:placa</span>
-      <span class="rota-desc">Busca veículo pela placa</span>
-    </div>
-    <div class="rota" onclick="testar('GET', '/api/v1/motoristas', this)">
-      <span class="metodo GET">GET</span>
-      <span class="rota-path">/api/v1/motoristas</span>
-      <span class="rota-desc">Lista todos os motoristas</span>
-    </div>
-    <div class="rota" onclick="testar('GET', '/api/v1/oficinas', this)">
-      <span class="metodo GET">GET</span>
-      <span class="rota-path">/api/v1/oficinas</span>
-      <span class="rota-desc">Lista todas as oficinas</span>
+  <!-- ARQUITETURA -->
+  <div class="section reveal">
+    <div class="section-label">Arquitetura — onde estamos</div>
+    <div class="arch-diagram">
+      <div class="arch-box">
+        <div class="arch-label">Etapa 1–2</div>
+        <div class="arch-name">Front-end</div>
+      </div>
+      <div class="arch-arrow">→</div>
+      <div class="arch-box">
+        <div class="arch-label">Etapa 3</div>
+        <div class="arch-name">Node puro</div>
+      </div>
+      <div class="arch-arrow">→</div>
+      <div class="arch-box active">
+        <div class="arch-label">Etapa atual</div>
+        <div class="arch-name">REST + Express</div>
+      </div>
+      <div class="arch-arrow">→</div>
+      <div class="arch-box">
+        <div class="arch-label">Etapa 7</div>
+        <div class="arch-name">MySQL</div>
+      </div>
     </div>
   </div>
 
-  <div class="resposta" id="resposta-box"></div>
+  <!-- REST -->
+  <div class="section reveal">
+    <div class="section-label">Conceito — REST</div>
+    <h2>Um protocolo de intenções</h2>
+    <p>REST (Representational State Transfer) é uma convenção — não uma tecnologia. Ela define como usar os verbos HTTP de forma semântica para criar APIs previsíveis e padronizadas.</p>
 
-  <h2>Como o Express organiza isso</h2>
-
-  <div class="code-block">
-<span class="comment">// app.js — Front Controller</span><br>
-<span class="keyword">const</span> express = <span class="fn">require</span>(<span class="string">'express'</span>);<br>
-<span class="keyword">const</span> app = <span class="fn">express</span>();<br>
-app.<span class="fn">use</span>(express.<span class="fn">json</span>());<br>
-<br>
-app.<span class="fn">use</span>(<span class="string">'/api/v1/veiculos'</span>, <span class="fn">require</span>(<span class="string">'./routes/veiculoRoutes'</span>));<br>
-app.<span class="fn">use</span>(<span class="string">'/api/v1/motoristas'</span>, <span class="fn">require</span>(<span class="string">'./routes/motoristaRoutes'</span>));<br>
-app.<span class="fn">use</span>(<span class="string">'/api/v1/oficinas'</span>, <span class="fn">require</span>(<span class="string">'./routes/oficinaRoutes'</span>));<br>
-<br>
-app.<span class="fn">listen</span>(<span class="number">3000</span>);
+    <table class="rest-table">
+      <thead>
+        <tr>
+          <th>Verbo</th>
+          <th>URL</th>
+          <th>O que faz</th>
+          <th>SQL equivalente</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><span class="method-badge GET">GET</span></td>
+          <td style="font-family:var(--mono);font-size:0.78rem">/api/v1/veiculos</td>
+          <td>Lista todos os veículos</td>
+          <td style="font-family:var(--mono);font-size:0.75rem;color:var(--cyan)">SELECT *</td>
+          <td style="font-family:var(--mono);font-size:0.78rem;color:var(--green)">200</td>
+        </tr>
+        <tr>
+          <td><span class="method-badge GET">GET</span></td>
+          <td style="font-family:var(--mono);font-size:0.78rem">/api/v1/veiculos/:placa</td>
+          <td>Busca um veículo</td>
+          <td style="font-family:var(--mono);font-size:0.75rem;color:var(--cyan)">SELECT WHERE</td>
+          <td style="font-family:var(--mono);font-size:0.78rem;color:var(--green)">200 / 404</td>
+        </tr>
+        <tr>
+          <td><span class="method-badge POST">POST</span></td>
+          <td style="font-family:var(--mono);font-size:0.78rem">/api/v1/veiculos</td>
+          <td>Cria um veículo</td>
+          <td style="font-family:var(--mono);font-size:0.75rem;color:var(--cyan)">INSERT INTO</td>
+          <td style="font-family:var(--mono);font-size:0.78rem;color:var(--green)">201</td>
+        </tr>
+        <tr>
+          <td><span class="method-badge PUT">PUT</span></td>
+          <td style="font-family:var(--mono);font-size:0.78rem">/api/v1/veiculos/:placa</td>
+          <td>Atualiza um veículo</td>
+          <td style="font-family:var(--mono);font-size:0.75rem;color:var(--cyan)">UPDATE SET</td>
+          <td style="font-family:var(--mono);font-size:0.78rem;color:var(--green)">200 / 404</td>
+        </tr>
+        <tr>
+          <td><span class="method-badge DELETE">DELETE</span></td>
+          <td style="font-family:var(--mono);font-size:0.78rem">/api/v1/veiculos/:placa</td>
+          <td>Remove um veículo</td>
+          <td style="font-family:var(--mono);font-size:0.75rem;color:var(--cyan)">DELETE FROM</td>
+          <td style="font-family:var(--mono);font-size:0.78rem;color:var(--green)">200 / 404</td>
+        </tr>
+      </tbody>
+    </table>
   </div>
 
-  <div class="code-block">
-<span class="comment">// routes/veiculoRoutes.js</span><br>
-<span class="keyword">const</span> router = <span class="fn">require</span>(<span class="string">'express'</span>).<span class="fn">Router</span>();<br>
-<span class="keyword">const</span> ctrl = <span class="fn">require</span>(<span class="string">'../controllers/veiculoController'</span>);<br>
-<br>
-router.<span class="fn">get</span>(<span class="string">'/'</span>, ctrl.listar);<br>
-router.<span class="fn">get</span>(<span class="string">'/:placa'</span>, ctrl.buscarPorPlaca);<br>
-router.<span class="fn">post</span>(<span class="string">'/'</span>, ctrl.criar);<br>
-router.<span class="fn">put</span>(<span class="string">'/:placa'</span>, ctrl.atualizar);<br>
-router.<span class="fn">delete</span>(<span class="string">'/:placa'</span>, ctrl.remover);<br>
-<br>
-module.exports = router;
+  <!-- EXPRESS -->
+  <div class="section reveal">
+    <div class="section-label">Conceito — Express</div>
+    <h2>Antes e depois</h2>
+
+    <div class="before-after">
+      <div class="code-block" style="border-left-color:var(--red)">
+        <span class="file-label">Node puro — etapa 3</span>
+        <span class="k">if</span> (req.method === <span class="s">'GET'</span><br>
+        &nbsp;&nbsp;&nbsp;&amp;&amp; req.url === <span class="s">'/api/v1/veiculos'</span>) {<br>
+        &nbsp;&nbsp;res.<span class="f">writeHead</span>(<span class="n">200</span>, {<br>
+        &nbsp;&nbsp;&nbsp;&nbsp;<span class="s">'Content-Type'</span>: <span class="s">'application/json'</span><br>
+        &nbsp;&nbsp;});<br>
+        &nbsp;&nbsp;res.<span class="f">end</span>(<span class="f">JSON.stringify</span>(dados));<br>
+        }
+      </div>
+      <div class="code-block" style="border-left-color:var(--green)">
+        <span class="file-label">Express — etapa 4</span>
+        <br>
+        <br>
+        app.<span class="f">get</span>(<span class="s">'/api/v1/veiculos'</span>,<br>
+        &nbsp;&nbsp;(req, res) => {<br>
+        &nbsp;&nbsp;&nbsp;&nbsp;res.<span class="f">json</span>(dados);<br>
+        &nbsp;&nbsp;});<br>
+        <br>
+      </div>
+    </div>
+
+    <div class="code-block">
+      <span class="file-label">app.js — servidor com Express</span>
+      <span class="k">const</span> express = <span class="f">require</span>(<span class="s">'express'</span>);<br>
+      <span class="k">const</span> app = <span class="f">express</span>();<br>
+      <br>
+      app.<span class="f">use</span>(express.<span class="f">json</span>());  <span class="c">// body parseado automaticamente</span><br>
+      <br>
+      app.<span class="f">get</span>(<span class="s">'/api/v1/veiculos'</span>, ctrl.listar);<br>
+      app.<span class="f">get</span>(<span class="s">'/api/v1/veiculos/:placa'</span>, ctrl.buscarPorPlaca);<br>
+      app.<span class="f">post</span>(<span class="s">'/api/v1/veiculos'</span>, ctrl.criar);<br>
+      app.<span class="f">put</span>(<span class="s">'/api/v1/veiculos/:placa'</span>, ctrl.atualizar);<br>
+      app.<span class="f">delete</span>(<span class="s">'/api/v1/veiculos/:placa'</span>, ctrl.remover);<br>
+      <br>
+      app.<span class="f">listen</span>(<span class="n">3000</span>);
+    </div>
+  </div>
+
+  <!-- STATUS CODES -->
+  <div class="section reveal">
+    <div class="section-label">Conceito — Status Codes</div>
+    <h2>O servidor não diz só "ok" ou "erro"</h2>
+    <p>Status codes são números que comunicam o resultado de uma requisição de forma precisa. Uma boa API usa os códigos corretos — não retorna 200 para tudo.</p>
+
+    <div class="status-grid">
+      <div class="status-item"><div class="status-code s2xx">200</div><div class="status-text">OK</div></div>
+      <div class="status-item"><div class="status-code s2xx">201</div><div class="status-text">Created</div></div>
+      <div class="status-item"><div class="status-code s2xx">204</div><div class="status-text">No Content</div></div>
+      <div class="status-item"><div class="status-code s4xx">400</div><div class="status-text">Bad Request</div></div>
+      <div class="status-item"><div class="status-code s4xx">401</div><div class="status-text">Unauthorized</div></div>
+      <div class="status-item"><div class="status-code s4xx">403</div><div class="status-text">Forbidden</div></div>
+      <div class="status-item"><div class="status-code s4xx">404</div><div class="status-text">Not Found</div></div>
+      <div class="status-item"><div class="status-code s5xx">500</div><div class="status-text">Server Error</div></div>
+    </div>
+  </div>
+
+  <!-- ENDPOINT TESTER -->
+  <div class="section reveal">
+    <div class="section-label">Demo — API em funcionamento</div>
+    <h2>Teste os endpoints da nossa API</h2>
+    <p>Selecione um endpoint abaixo e clique em Enviar. A requisição vai para a API real no Railway.</p>
+
+    <div class="endpoint-tester">
+      <div class="et-header">
+        <select class="et-select" id="et-method">
+          <option>GET</option>
+        </select>
+        <select class="et-url" id="et-endpoint" onchange="atualizarUrl()">
+          <option value="/api/v1/veiculos">GET /api/v1/veiculos — lista todos</option>
+          <option value="/api/v1/veiculos/ABC-1234">GET /api/v1/veiculos/ABC-1234 — busca por placa</option>
+          <option value="/api/v1/motoristas">GET /api/v1/motoristas</option>
+          <option value="/api/v1/oficinas">GET /api/v1/oficinas</option>
+          <option value="/">GET / — health check</option>
+        </select>
+        <button class="btn btn-primary" style="flex-shrink:0" onclick="testarEndpoint()">Enviar →</button>
+      </div>
+      <div class="et-response" id="et-response">// selecione um endpoint e clique em Enviar</div>
+    </div>
+
+    <div class="callout tip">
+      <span class="callout-icon">💡</span>
+      <span>Observe o status code e o tempo de resposta. Uma boa API responde em menos de 200ms para buscas simples.</span>
+    </div>
+  </div>
+
+  <!-- FECHAMENTO -->
+  <div class="section reveal">
+    <div class="callout ok">
+      <span class="callout-icon">✅</span>
+      <span><strong>O que aprendemos:</strong> princípios REST, express(), app.get/post/put/delete, req.params, req.body, res.json(), res.status(), middleware express.json(), e mapeamento HTTP ↔ SQL ↔ CRUD.</span>
+    </div>
   </div>
 
 </div>
+
+<div class="unit-nav">
+  <a href="../u3/index.html">← Etapa 03 — O servidor responde</a>
+  <a href="../u5/index.html">Etapa 05 — O código se organiza →</a>
+</div>
+
+<footer>IFCE · DW2 · Etapa 04 de 08</footer>
 
 <script>
-  const API = 'https://gestao-frota-api.up.railway.app';
-  let rotaAtiva = null;
+const API = 'https://gestao-frota-api.up.railway.app';
 
-  async function testar(metodo, path, el) {
-    if (rotaAtiva) rotaAtiva.style.background = 'white';
-    rotaAtiva = el;
-    el.style.background = '#EBF4FF';
-
-    const box = document.getElementById('resposta-box');
-    box.classList.add('visivel');
-    box.textContent = '⏳ Aguardando resposta...';
-
-    try {
-      const res = await fetch(API + path);
-      const data = await res.json();
-      box.textContent = `// HTTP ${res.status}\n${JSON.stringify(data, null, 2)}`;
-    } catch (err) {
-      box.textContent = `// Erro: ${err.message}\n// Verifique se o back-end está online no Railway.`;
-    }
+async function testarEndpoint() {
+  const endpoint = document.getElementById('et-endpoint').value;
+  const box = document.getElementById('et-response');
+  box.textContent = '// aguardando resposta...';
+  box.style.color = 'var(--text-dim)';
+  const t0 = Date.now();
+  try {
+    const res = await fetch(API + endpoint);
+    const data = await res.json();
+    const ms = Date.now() - t0;
+    box.style.color = res.ok ? 'var(--green)' : 'var(--red)';
+    box.textContent = `// HTTP ${res.status} · ${ms}ms\n\n${JSON.stringify(data, null, 2)}`;
+  } catch (err) {
+    box.style.color = 'var(--red)';
+    box.textContent = `// Erro: ${err.message}\n// Verifique se a API está online no Railway`;
   }
+}
 </script>
-
 </body>
 </html>

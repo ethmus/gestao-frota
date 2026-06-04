@@ -3,228 +3,352 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>U2 — Fetch API | Gestão de Frota</title>
+  <title>Etapa 2 — A interface conversa | Gestão de Frota DW2</title>
+  <link rel="stylesheet" href="../style.css">
   <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-    body { font-family: 'Segoe UI', Arial, sans-serif; background: #f0f4f8; color: #1a202c; }
-
-    .topbar {
-      background: #1E3A8A;
-      color: white;
-      padding: 0.8rem 1.5rem;
-      display: flex;
-      align-items: center;
-      gap: 1rem;
-    }
-    .topbar a { color: #93c5fd; font-size: 0.85rem; text-decoration: none; }
-    .topbar a:hover { text-decoration: underline; }
-    .topbar span { color: white; font-weight: 600; }
-    .unidade-badge {
-      background: #1E88E5;
-      color: white;
-      font-size: 0.75rem;
-      padding: 0.2rem 0.7rem;
-      border-radius: 999px;
-      margin-left: auto;
-    }
-
-    .explicacao {
-      background: #EBF4FF;
-      border-left: 4px solid #1E88E5;
-      padding: 1rem 1.5rem;
-      font-size: 0.9rem;
-      color: #1a365d;
-      line-height: 1.6;
-    }
-
-    .app {
-      max-width: 860px;
-      margin: 2rem auto;
-      padding: 0 1rem;
-    }
-
-    .app-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 1.5rem;
-    }
-
-    .app-header h1 { font-size: 1.4rem; color: #1E3A8A; }
-
-    .btn {
-      background: #1E88E5;
-      color: white;
-      border: none;
-      padding: 0.6rem 1.2rem;
-      border-radius: 6px;
-      font-size: 0.9rem;
-      cursor: pointer;
-    }
-
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      background: white;
-      border-radius: 8px;
-      overflow: hidden;
-      box-shadow: 0 1px 4px rgba(0,0,0,0.08);
-    }
-
-    thead { background: #1E3A8A; color: white; }
-    thead th { padding: 0.9rem 1rem; text-align: left; font-size: 0.85rem; }
-    tbody tr { border-bottom: 1px solid #e2e8f0; }
-    tbody tr:last-child { border: none; }
-    tbody td { padding: 0.85rem 1rem; font-size: 0.9rem; }
-
-    .status {
-      display: inline-block;
-      padding: 0.2rem 0.6rem;
-      border-radius: 999px;
-      font-size: 0.75rem;
-      font-weight: 600;
-    }
-    .ativo { background: #D1FAE5; color: #065F46; }
-    .manutencao { background: #FEF3C7; color: #92400E; }
-    .inativo { background: #FEE2E2; color: #991B1B; }
-
-    .loading {
-      text-align: center;
-      padding: 2rem;
-      color: #718096;
-      font-size: 0.9rem;
-    }
-
-    .erro {
-      background: #FEE2E2;
-      border: 1px solid #FCA5A5;
-      border-radius: 6px;
-      padding: 1rem;
-      color: #991B1B;
-      font-size: 0.88rem;
-      margin-top: 1rem;
-    }
-
-    .code-block {
-      background: #1e293b;
-      color: #e2e8f0;
-      border-radius: 8px;
+    .req-visualizer {
+      background: rgba(11,22,40,0.9);
+      border: 1px solid rgba(201,168,76,0.2);
+      border-radius: var(--radius);
       padding: 1.2rem;
-      font-family: 'Consolas', monospace;
-      font-size: 0.82rem;
-      line-height: 1.7;
-      margin-top: 1.5rem;
-      overflow-x: auto;
+      font-family: var(--mono);
+      font-size: 0.75rem;
     }
+    .req-line {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.4rem 0;
+      border-bottom: 1px solid rgba(255,255,255,0.04);
+      opacity: 0.4;
+      transition: opacity 0.3s;
+    }
+    .req-line.active { opacity: 1; }
+    .req-line.done   { opacity: 0.7; }
+    .req-method { padding: 0.1rem 0.4rem; border-radius: 3px; font-size: 0.65rem; font-weight: 500; background: rgba(78,205,196,0.15); color: var(--cyan); }
+    .req-url    { color: var(--text-dim); flex: 1; }
+    .req-status { padding: 0.1rem 0.4rem; border-radius: 3px; font-size: 0.65rem; }
+    .req-status.ok   { background: rgba(82,201,122,0.15); color: var(--green); }
+    .req-status.err  { background: rgba(224,82,82,0.15);  color: var(--red); }
+    .req-status.wait { background: rgba(201,168,76,0.15); color: var(--gold); }
 
-    .code-block .comment { color: #64748b; }
-    .code-block .keyword { color: #7dd3fc; }
-    .code-block .string { color: #86efac; }
-    .code-block .fn { color: #fbbf24; }
+    .comparison {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+      margin: 1rem 0;
+    }
+    @media(max-width:600px) { .comparison { grid-template-columns: 1fr; } }
+
+    .comparison-box {
+      border-radius: var(--radius);
+      padding: 1rem;
+      font-size: 0.82rem;
+    }
+    .comparison-box h4 {
+      font-family: var(--mono);
+      font-size: 0.65rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      margin-bottom: 0.6rem;
+    }
+    .comparison-box.before {
+      background: rgba(224,82,82,0.06);
+      border: 1px solid rgba(224,82,82,0.15);
+    }
+    .comparison-box.before h4 { color: var(--red); }
+    .comparison-box.after {
+      background: rgba(82,201,122,0.06);
+      border: 1px solid rgba(82,201,122,0.15);
+    }
+    .comparison-box.after h4 { color: var(--green); }
+    .comparison-box p { color: var(--text-dim); line-height: 1.6; }
   </style>
 </head>
 <body>
 
-<div class="topbar">
-  <a href="../index.html">← Voltar ao início</a>
-  <span>Unidade 2 — Fetch API</span>
-  <span class="unidade-badge">JavaScript + Fetch</span>
-</div>
+<nav class="topbar">
+  <a href="../index.html" class="topbar-brand">← Gestão de Frota</a>
+  <span class="topbar-sep">/</span>
+  <span class="topbar-title">Etapa 02</span>
+  <span class="topbar-tag">Fetch API · AJAX · Async</span>
+</nav>
 
-<div class="explicacao">
-  <strong>O que mudou em relação à U1:</strong> o HTML não tem mais dados escritos nele.
-  O JavaScript usa <code>fetch()</code> para buscar os veículos no servidor e montar a tabela dinamicamente.
-  Abra o DevTools (F12 → Network) para ver a requisição acontecer.
-</div>
+<section class="unit-hero">
+  <div class="unit-number reveal">Etapa 02 de 08</div>
+  <h1 class="reveal reveal-1">A interface <em>conversa</em></h1>
+  <p class="lead reveal reveal-2">
+    Na etapa anterior, os dados estavam escritos no próprio JavaScript.
+    Agora a interface aprende a perguntar — ela envia uma requisição HTTP para um servidor
+    e exibe o que recebe de volta. A página não recarrega. O usuário não espera. A experiência fica fluida.
+  </p>
+  <div class="concepts reveal reveal-3">
+    <span class="concept-tag js">AJAX</span>
+    <span class="concept-tag js">Fetch API</span>
+    <span class="concept-tag js">Promise</span>
+    <span class="concept-tag js">Async/Await</span>
+    <span class="concept-tag js">JSON</span>
+  </div>
+</section>
 
-<div class="app">
-  <div class="app-header">
-    <h1>🚛 Veículos da Frota</h1>
-    <button class="btn" onclick="carregarVeiculos()">↻ Recarregar</button>
+<div class="content">
+
+  <!-- ARQUITETURA -->
+  <div class="section reveal">
+    <div class="section-label">Arquitetura — onde estamos</div>
+    <div class="arch-diagram">
+      <div class="arch-box">
+        <div class="arch-label">Etapa 1</div>
+        <div class="arch-name">Front-end</div>
+      </div>
+      <div class="arch-arrow">→</div>
+      <div class="arch-box active">
+        <div class="arch-label">Etapa atual</div>
+        <div class="arch-name">Fetch API</div>
+      </div>
+      <div class="arch-arrow">→</div>
+      <div class="arch-box">
+        <div class="arch-label">Etapa 3–4</div>
+        <div class="arch-name">Node / Express</div>
+      </div>
+      <div class="arch-arrow">→</div>
+      <div class="arch-box">
+        <div class="arch-label">Etapa 7</div>
+        <div class="arch-name">MySQL</div>
+      </div>
+    </div>
   </div>
 
-  <table>
-    <thead>
-      <tr>
-        <th>Placa</th>
-        <th>Modelo</th>
-        <th>Ano</th>
-        <th>Km Atual</th>
-        <th>Status</th>
-      </tr>
-    </thead>
-    <tbody id="tbody-veiculos">
-      <tr>
-        <td colspan="5" class="loading">Carregando veículos...</td>
-      </tr>
-    </tbody>
-  </table>
-
-  <div class="code-block">
-    <span class="comment">// O código que faz isso acontecer (veja no fonte da página)</span><br>
-    <span class="keyword">async function</span> <span class="fn">carregarVeiculos</span>() {<br>
-    &nbsp;&nbsp;<span class="keyword">const</span> resposta = <span class="keyword">await</span> <span class="fn">fetch</span>(<span class="string">'https://gestao-frota-api.up.railway.app/api/v1/veiculos'</span>);<br>
-    &nbsp;&nbsp;<span class="keyword">const</span> veiculos = <span class="keyword">await</span> resposta.<span class="fn">json</span>();<br>
-    &nbsp;&nbsp;<span class="comment">// para cada veículo, cria uma linha na tabela</span><br>
-    }
+  <!-- COMPARAÇÃO -->
+  <div class="section reveal">
+    <div class="section-label">O que mudou</div>
+    <h2>De dados fixos para dados dinâmicos</h2>
+    <div class="comparison">
+      <div class="comparison-box before">
+        <h4>❌ Etapa 1 — dados no código</h4>
+        <p>Os veículos estavam escritos no JavaScript. Para mudar um dado, era preciso editar o código-fonte e publicar de novo.</p>
+      </div>
+      <div class="comparison-box after">
+        <h4>✅ Etapa 2 — dados do servidor</h4>
+        <p>O JavaScript faz uma requisição HTTP ao servidor e recebe os dados como JSON. O HTML não muda — só o conteúdo muda.</p>
+      </div>
+    </div>
   </div>
+
+  <!-- FETCH -->
+  <div class="section reveal">
+    <div class="section-label">Conceito — Fetch API</div>
+    <h2>Uma requisição em três linhas</h2>
+    <p>
+      A Fetch API é a forma moderna de fazer requisições HTTP no navegador.
+      Ela retorna uma <strong style="color:var(--cyan)">Promise</strong> — uma promessa de que algo vai chegar.
+      Com <code style="color:var(--cyan);font-family:var(--mono)">async/await</code>, escrevemos esse código assíncrono de forma linear e legível.
+    </p>
+
+    <div class="code-block">
+      <span class="file-label">app.js</span>
+      <span class="c">// async → esta função pode "aguardar" respostas</span><br>
+      <span class="k">async function</span> <span class="f">carregarVeiculos</span>() {<br>
+      <br>
+      &nbsp;&nbsp;<span class="c">// fetch envia GET e retorna uma Promise</span><br>
+      &nbsp;&nbsp;<span class="k">const</span> resposta = <span class="k">await</span> <span class="f">fetch</span>(<span class="s">'/api/v1/veiculos'</span>);<br>
+      <br>
+      &nbsp;&nbsp;<span class="c">// .json() lê o corpo e converte para objeto JS</span><br>
+      &nbsp;&nbsp;<span class="k">const</span> veiculos = <span class="k">await</span> resposta.<span class="f">json</span>();<br>
+      <br>
+      &nbsp;&nbsp;<span class="c">// agora temos um array — usamos igual à etapa 1</span><br>
+      &nbsp;&nbsp;<span class="f">renderizar</span>(veiculos);<br>
+      }<br>
+    </div>
+
+    <div class="callout tip">
+      <span class="callout-icon">💡</span>
+      <span><strong>Por que async/await?</strong> Requisições de rede levam tempo. Se o código fosse síncrono, a página travaria esperando a resposta. Com async/await, o navegador continua responsivo enquanto aguarda.</span>
+    </div>
+  </div>
+
+  <!-- TRATAMENTO DE ERROS -->
+  <div class="section reveal">
+    <div class="section-label">Conceito — Tratamento de erros</div>
+    <h2>O servidor pode não responder</h2>
+    <p>Rede cai, servidor reinicia, URL errada. O código precisa lidar com isso de forma elegante, sem travar ou mostrar mensagens confusas ao usuário.</p>
+
+    <div class="code-block">
+      <span class="file-label">app.js</span>
+      <span class="k">async function</span> <span class="f">carregarVeiculos</span>() {<br>
+      &nbsp;&nbsp;<span class="k">try</span> {<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;<span class="k">const</span> resposta = <span class="k">await</span> <span class="f">fetch</span>(<span class="s">'/api/v1/veiculos'</span>);<br>
+      <br>
+      &nbsp;&nbsp;&nbsp;&nbsp;<span class="c">// verificar se o servidor respondeu com sucesso</span><br>
+      &nbsp;&nbsp;&nbsp;&nbsp;<span class="k">if</span> (!resposta.ok) <span class="k">throw new</span> <span class="f">Error</span>(<span class="s">`HTTP ${resposta.status}`</span>);<br>
+      <br>
+      &nbsp;&nbsp;&nbsp;&nbsp;<span class="k">const</span> veiculos = <span class="k">await</span> resposta.<span class="f">json</span>();<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;<span class="f">renderizar</span>(veiculos);<br>
+      <br>
+      &nbsp;&nbsp;} <span class="k">catch</span> (erro) {<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;<span class="f">mostrarErro</span>(erro.message);<br>
+      &nbsp;&nbsp;}<br>
+      }<br>
+    </div>
+  </div>
+
+  <!-- DEMO -->
+  <div class="section reveal">
+    <div class="section-label">Demo — Fetch em ação</div>
+    <h2>Veja a requisição acontecer</h2>
+    <p>Clique no botão abaixo. O visualizador mostra cada etapa da requisição em tempo real — exatamente o que acontece quando você abre o DevTools → Network.</p>
+
+    <div class="req-visualizer" id="req-viz">
+      <div class="req-line" id="req-1">
+        <span class="req-method">GET</span>
+        <span class="req-url">/api/v1/veiculos</span>
+        <span class="req-status wait" id="req-1-status">aguardando</span>
+      </div>
+      <div class="req-line" id="req-2">
+        <span class="req-method" style="background:rgba(201,168,76,0.15);color:var(--gold)">RES</span>
+        <span class="req-url">Content-Type: application/json</span>
+        <span class="req-status" id="req-2-status">—</span>
+      </div>
+      <div class="req-line" id="req-3">
+        <span class="req-method" style="background:rgba(82,201,122,0.15);color:var(--green)">JSON</span>
+        <span class="req-url" id="req-3-body">aguardando dados...</span>
+        <span class="req-status" id="req-3-status">—</span>
+      </div>
+    </div>
+
+    <div style="margin:0.8rem 0;display:flex;gap:0.6rem;flex-wrap:wrap">
+      <button class="btn btn-primary" onclick="simularFetch(true)">▶ Simular requisição (sucesso)</button>
+      <button class="btn btn-ghost" onclick="simularFetch(false)">▶ Simular erro de rede</button>
+    </div>
+
+    <div class="demo-frame" style="margin-top:1rem">
+      <div class="demo-toolbar">
+        <div class="demo-dot red"></div>
+        <div class="demo-dot yellow"></div>
+        <div class="demo-dot green"></div>
+        <div class="demo-url">GET /api/v1/veiculos → 200 OK</div>
+      </div>
+      <div class="demo-body">
+        <table class="data-table">
+          <thead>
+            <tr><th>Placa</th><th>Modelo</th><th>Ano</th><th>Km</th><th>Status</th></tr>
+          </thead>
+          <tbody id="tbody-u2">
+            <tr><td colspan="5" class="loading">Aguardando requisição</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="callout tip">
+      <span class="callout-icon">💡</span>
+      <span>Abra o DevTools (F12 → aba Network) e clique no botão. Você verá a requisição real sendo feita, o tempo de resposta e o JSON recebido — exatamente como em produção.</span>
+    </div>
+  </div>
+
+  <!-- DIFERENÇA FETCH vs SERVIDOR REAL -->
+  <div class="section reveal">
+    <div class="section-label">Próximo passo</div>
+    <h2>De onde vêm os dados agora?</h2>
+    <p>Nesta etapa, a API que o <code style="font-family:var(--mono);color:var(--cyan)">fetch()</code> chama está rodando no Railway. Nas etapas 3 e 4 você verá como esse servidor foi construído — linha por linha.</p>
+
+    <div class="callout ok">
+      <span class="callout-icon">✅</span>
+      <span><strong>O que aprendemos:</strong> fetch(), async/await, Promise, .json(), tratamento de erros com try/catch, status HTTP, e como separar dados de apresentação.</span>
+    </div>
+  </div>
+
 </div>
+
+<div class="unit-nav">
+  <a href="../u1/index.html">← Etapa 01 — A interface nasce</a>
+  <a href="../u3/index.html">Etapa 03 — O servidor responde →</a>
+</div>
+
+<footer>IFCE · DW2 · Etapa 02 de 08</footer>
 
 <script>
-  const API = 'https://gestao-frota-api.up.railway.app/api/v1';
+const API = 'https://gestao-frota-api.up.railway.app/api/v1';
 
-  function statusBadge(status) {
-    const map = {
-      'ativo': 'ativo',
-      'manutenção': 'manutencao',
-      'manutencao': 'manutencao',
-      'inativo': 'inativo'
-    };
-    const cls = map[status?.toLowerCase()] || 'inativo';
-    const label = status?.charAt(0).toUpperCase() + status?.slice(1) || '—';
-    return `<span class="status ${cls}">${label}</span>`;
+const dadosFake = [
+  { placa: 'ABC-1234', modelo: 'Fiat Ducato',         ano: 2021, km_atual: 48200,  status: 'ativo' },
+  { placa: 'DEF-5678', modelo: 'Mercedes Sprinter',   ano: 2019, km_atual: 112400, status: 'manutencao' },
+  { placa: 'GHI-9012', modelo: 'Volkswagen Delivery', ano: 2022, km_atual: 21800,  status: 'ativo' },
+];
+
+function badge(s) {
+  return `<span class="badge ${s}">${s === 'manutencao' ? 'Manutenção' : s.charAt(0).toUpperCase() + s.slice(1)}</span>`;
+}
+
+function renderizar(lista) {
+  document.getElementById('tbody-u2').innerHTML = lista.map(v => `
+    <tr>
+      <td style="font-family:var(--mono);font-size:0.8rem">${v.placa}</td>
+      <td>${v.modelo}</td>
+      <td>${v.ano}</td>
+      <td style="font-family:var(--mono);font-size:0.8rem">${Number(v.km_atual).toLocaleString('pt-BR')} km</td>
+      <td>${badge(v.status)}</td>
+    </tr>`).join('');
+}
+
+async function simularFetch(sucesso) {
+  // Reset
+  ['req-1','req-2','req-3'].forEach(id => {
+    document.getElementById(id).className = 'req-line';
+  });
+  document.getElementById('req-1-status').textContent = 'enviando...';
+  document.getElementById('req-1-status').className = 'req-status wait';
+  document.getElementById('req-2-status').textContent = '—';
+  document.getElementById('req-3-status').textContent = '—';
+  document.getElementById('req-3-body').textContent = 'aguardando dados...';
+  document.getElementById('tbody-u2').innerHTML = '<tr><td colspan="5" class="loading">Buscando</td></tr>';
+
+  document.getElementById('req-1').classList.add('active');
+  await new Promise(r => setTimeout(r, 600));
+
+  if (!sucesso) {
+    document.getElementById('req-1-status').textContent = 'ERRO';
+    document.getElementById('req-1-status').className = 'req-status err';
+    document.getElementById('req-2-status').textContent = 'network error';
+    document.getElementById('req-2-status').className = 'req-status err';
+    document.getElementById('req-2').classList.add('active');
+    document.getElementById('tbody-u2').innerHTML = `
+      <tr><td colspan="5">
+        <div class="callout danger" style="margin:0">
+          <span class="callout-icon">🚨</span>
+          <span>Erro de rede: Failed to fetch. Verifique a conexão e se a API está online.</span>
+        </div>
+      </td></tr>`;
+    return;
   }
 
-  async function carregarVeiculos() {
-    const tbody = document.getElementById('tbody-veiculos');
-    tbody.innerHTML = '<tr><td colspan="5" class="loading">Carregando...</td></tr>';
+  document.getElementById('req-1-status').textContent = '→ servidor';
+  await new Promise(r => setTimeout(r, 800));
 
-    try {
-      const resposta = await fetch(`${API}/veiculos`);
-      if (!resposta.ok) throw new Error(`Servidor retornou ${resposta.status}`);
-      const veiculos = await resposta.json();
+  document.getElementById('req-2').classList.add('active');
+  document.getElementById('req-2-status').textContent = '200 OK';
+  document.getElementById('req-2-status').className = 'req-status ok';
+  await new Promise(r => setTimeout(r, 400));
 
-      if (veiculos.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="5" class="loading">Nenhum veículo cadastrado.</td></tr>';
-        return;
-      }
+  document.getElementById('req-3').classList.add('active');
+  document.getElementById('req-3-body').textContent = `[{placa:"ABC-1234",...}, {placa:"DEF-5678",...}, ...]`;
+  document.getElementById('req-3-status').textContent = `${dadosFake.length} itens`;
+  document.getElementById('req-3-status').className = 'req-status ok';
+  document.getElementById('req-1-status').textContent = 'concluído';
+  document.getElementById('req-1').classList.add('done');
 
-      tbody.innerHTML = veiculos.map(v => `
-        <tr>
-          <td>${v.placa}</td>
-          <td>${v.modelo}</td>
-          <td>${v.ano}</td>
-          <td>${Number(v.km_atual).toLocaleString('pt-BR')} km</td>
-          <td>${statusBadge(v.status)}</td>
-        </tr>
-      `).join('');
-
-    } catch (err) {
-      tbody.innerHTML = `
-        <tr>
-          <td colspan="5">
-            <div class="erro">
-              ⚠️ Não foi possível conectar à API: <strong>${err.message}</strong><br>
-              <small>Verifique se o back-end está em execução no Railway.</small>
-            </div>
-          </td>
-        </tr>
-      `;
+  try {
+    const res = await fetch(`${API}/veiculos`);
+    if (res.ok) {
+      const dados = await res.json();
+      renderizar(dados);
+    } else {
+      renderizar(dadosFake);
     }
+  } catch {
+    renderizar(dadosFake);
   }
-
-  carregarVeiculos();
+}
 </script>
-
 </body>
 </html>

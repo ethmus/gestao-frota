@@ -3,135 +3,269 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>U3 — Node.js Puro | Gestão de Frota</title>
+  <title>Etapa 3 — O servidor responde | Gestão de Frota DW2</title>
+  <link rel="stylesheet" href="../style.css">
   <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-    body { font-family: 'Segoe UI', Arial, sans-serif; background: #f0f4f8; color: #1a202c; }
-
-    .topbar {
-      background: #1E3A8A; color: white;
-      padding: 0.8rem 1.5rem;
-      display: flex; align-items: center; gap: 1rem;
+    .http-flow {
+      display: grid;
+      grid-template-columns: 1fr auto 1fr;
+      gap: 1rem;
+      align-items: center;
+      margin: 1.5rem 0;
     }
-    .topbar a { color: #93c5fd; font-size: 0.85rem; text-decoration: none; }
-    .topbar span { color: white; font-weight: 600; }
-    .unidade-badge {
-      background: #1E88E5; color: white;
-      font-size: 0.75rem; padding: 0.2rem 0.7rem;
-      border-radius: 999px; margin-left: auto;
+    .http-side {
+      background: rgba(15,31,61,0.6);
+      border: 1px solid rgba(255,255,255,0.06);
+      border-radius: var(--radius);
+      padding: 1rem;
+      text-align: center;
     }
-
-    .explicacao {
-      background: #EBF4FF;
-      border-left: 4px solid #1E88E5;
-      padding: 1rem 1.5rem;
-      font-size: 0.9rem; color: #1a365d; line-height: 1.6;
+    .http-side .side-label {
+      font-family: var(--mono);
+      font-size: 0.6rem;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--text-dim);
+      margin-bottom: 0.4rem;
     }
-
-    .app { max-width: 860px; margin: 2rem auto; padding: 0 1rem; }
-
-    h2 { font-size: 1rem; color: #1E3A8A; margin: 1.5rem 0 0.8rem; text-transform: uppercase; letter-spacing: 0.05em; }
-
-    .code-block {
-      background: #1e293b; color: #e2e8f0;
-      border-radius: 8px; padding: 1.2rem;
-      font-family: 'Consolas', monospace;
-      font-size: 0.82rem; line-height: 1.8;
-      overflow-x: auto; margin-bottom: 1rem;
+    .http-side .side-name {
+      font-family: var(--serif);
+      font-size: 1.1rem;
+      color: var(--text-bright);
     }
-    .comment { color: #64748b; }
-    .keyword { color: #7dd3fc; }
-    .string { color: #86efac; }
-    .fn { color: #fbbf24; }
-    .number { color: #f9a8d4; }
-
-    .problema {
-      background: #FEE2E2; border: 1px solid #FCA5A5;
-      border-radius: 6px; padding: 1rem 1.2rem;
-      font-size: 0.88rem; color: #991B1B; line-height: 1.6;
-      margin-bottom: 1rem;
+    .http-middle { text-align: center; }
+    .http-req {
+      font-family: var(--mono);
+      font-size: 0.65rem;
+      color: var(--cyan);
+      padding: 0.2rem 0;
     }
-
-    .solucao {
-      background: #D1FAE5; border: 1px solid #6EE7B7;
-      border-radius: 6px; padding: 1rem 1.2rem;
-      font-size: 0.88rem; color: #065F46; line-height: 1.6;
-      margin-bottom: 1rem;
+    .http-res {
+      font-family: var(--mono);
+      font-size: 0.65rem;
+      color: var(--green);
+      padding: 0.2rem 0;
     }
+    .http-arrow { color: var(--text-dim); }
+
+    .dor-solucao {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+      margin: 1rem 0;
+    }
+    @media(max-width:600px) { .dor-solucao { grid-template-columns: 1fr; } }
+    .dor-box {
+      border-radius: var(--radius);
+      padding: 1rem;
+      font-size: 0.82rem;
+      line-height: 1.6;
+    }
+    .dor { background: rgba(224,82,82,0.06); border: 1px solid rgba(224,82,82,0.15); color: var(--text-dim); }
+    .dor h4 { color: var(--red); font-family: var(--mono); font-size: 0.65rem; letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 0.5rem; }
+    .sol { background: rgba(82,201,122,0.06); border: 1px solid rgba(82,201,122,0.15); color: var(--text-dim); }
+    .sol h4 { color: var(--green); font-family: var(--mono); font-size: 0.65rem; letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 0.5rem; }
+
+    .terminal {
+      background: #0A0F1A;
+      border: 1px solid rgba(78,205,196,0.2);
+      border-radius: var(--radius);
+      padding: 1rem 1.2rem;
+      font-family: var(--mono);
+      font-size: 0.78rem;
+      line-height: 1.8;
+      margin: 1rem 0;
+    }
+    .terminal .prompt { color: var(--green); }
+    .terminal .cmd    { color: var(--text-bright); }
+    .terminal .out    { color: var(--text-dim); }
+    .terminal .high   { color: var(--cyan); }
   </style>
 </head>
 <body>
 
-<div class="topbar">
-  <a href="../index.html">← Voltar ao início</a>
-  <span>Unidade 3 — Servidor Node.js Puro</span>
-  <span class="unidade-badge">Node.js</span>
+<nav class="topbar">
+  <a href="../index.html" class="topbar-brand">← Gestão de Frota</a>
+  <span class="topbar-sep">/</span>
+  <span class="topbar-title">Etapa 03</span>
+  <span class="topbar-tag">Node.js · HTTP · req/res</span>
+</nav>
+
+<section class="unit-hero">
+  <div class="unit-number reveal">Etapa 03 de 08</div>
+  <h1 class="reveal reveal-1">O servidor <em>responde</em></h1>
+  <p class="lead reveal reveal-2">
+    Até aqui, o front-end sabia fazer perguntas. Agora aprendemos a construir quem responde.
+    Com Node.js puro — sem Express, sem framework — criamos um servidor HTTP do zero.
+    O objetivo não é conforto: é entender o que acontece por baixo de cada requisição.
+  </p>
+  <div class="concepts reveal reveal-3">
+    <span class="concept-tag node">Node.js</span>
+    <span class="concept-tag node">HTTP</span>
+    <span class="concept-tag node">req</span>
+    <span class="concept-tag node">res</span>
+    <span class="concept-tag node">Módulos</span>
+  </div>
+</section>
+
+<div class="content">
+
+  <!-- ARQUITETURA -->
+  <div class="section reveal">
+    <div class="section-label">Arquitetura — onde estamos</div>
+    <div class="arch-diagram">
+      <div class="arch-box">
+        <div class="arch-label">Etapa 1–2</div>
+        <div class="arch-name">Front-end</div>
+      </div>
+      <div class="arch-arrow">→</div>
+      <div class="arch-box active">
+        <div class="arch-label">Etapa atual</div>
+        <div class="arch-name">Node.js puro</div>
+      </div>
+      <div class="arch-arrow">→</div>
+      <div class="arch-box">
+        <div class="arch-label">Etapa 4</div>
+        <div class="arch-name">Express</div>
+      </div>
+      <div class="arch-arrow">→</div>
+      <div class="arch-box">
+        <div class="arch-label">Etapa 7</div>
+        <div class="arch-name">MySQL</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- HTTP -->
+  <div class="section reveal">
+    <div class="section-label">Conceito — HTTP</div>
+    <h2>Uma conversa entre dois lados</h2>
+    <p>HTTP é o protocolo que governa a comunicação entre navegador e servidor. Cada interação é uma troca: o cliente envia uma <strong style="color:var(--cyan)">requisição</strong>, o servidor devolve uma <strong style="color:var(--green)">resposta</strong>.</p>
+
+    <div class="http-flow">
+      <div class="http-side">
+        <div class="side-label">Cliente</div>
+        <div class="side-name">Navegador</div>
+      </div>
+      <div class="http-middle">
+        <div class="http-req">GET /api/v1/veiculos →</div>
+        <div class="http-arrow">⇄</div>
+        <div class="http-res">← 200 OK + JSON</div>
+      </div>
+      <div class="http-side">
+        <div class="side-label">Servidor</div>
+        <div class="side-name">Node.js</div>
+      </div>
+    </div>
+
+    <p>Toda requisição carrega: <strong style="color:var(--text-bright)">método</strong> (GET, POST...), <strong style="color:var(--text-bright)">URL</strong> (qual recurso), <strong style="color:var(--text-bright)">headers</strong> (metadados) e, opcionalmente, <strong style="color:var(--text-bright)">body</strong> (dados enviados).</p>
+  </div>
+
+  <!-- NODE PURO -->
+  <div class="section reveal">
+    <div class="section-label">Conceito — Node.js sem framework</div>
+    <h2>O servidor na sua forma mais crua</h2>
+    <p>
+      Com o módulo <code style="font-family:var(--mono);color:var(--cyan)">http</code> nativo do Node.js, criamos um servidor que recebe cada requisição e decide manualmente o que fazer.
+    </p>
+
+    <div class="terminal">
+      <span class="prompt">$</span> <span class="cmd">node servidor.js</span><br>
+      <span class="out">Servidor rodando em </span><span class="high">http://localhost:3000</span>
+    </div>
+
+    <div class="code-block">
+      <span class="file-label">servidor.js</span>
+      <span class="k">const</span> http = <span class="f">require</span>(<span class="s">'http'</span>);  <span class="c">// módulo nativo do Node</span><br>
+      <br>
+      <span class="k">const</span> servidor = http.<span class="f">createServer</span>((req, res) => {<br>
+      <br>
+      &nbsp;&nbsp;<span class="c">// req.method → qual verbo HTTP foi usado</span><br>
+      &nbsp;&nbsp;<span class="c">// req.url    → qual URL foi acessada</span><br>
+      <br>
+      &nbsp;&nbsp;<span class="k">if</span> (req.method === <span class="s">'GET'</span> && req.url === <span class="s">'/api/v1/veiculos'</span>) {<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;res.<span class="f">writeHead</span>(<span class="n">200</span>, { <span class="s">'Content-Type'</span>: <span class="s">'application/json'</span> });<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;res.<span class="f">end</span>(<span class="f">JSON.stringify</span>([<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{ placa: <span class="s">'ABC-1234'</span>, modelo: <span class="s">'Fiat Ducato'</span> }<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;]));<br>
+      <br>
+      &nbsp;&nbsp;} <span class="k">else</span> {<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;res.<span class="f">writeHead</span>(<span class="n">404</span>);<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;res.<span class="f">end</span>(<span class="f">JSON.stringify</span>({ erro: <span class="s">'Rota não encontrada'</span> }));<br>
+      &nbsp;&nbsp;}<br>
+      });<br>
+      <br>
+      servidor.<span class="f">listen</span>(<span class="n">3000</span>);
+    </div>
+  </div>
+
+  <!-- DOR E SOLUÇÃO -->
+  <div class="section reveal">
+    <div class="section-label">A dor que essa etapa causa (de propósito)</div>
+    <h2>Por que isso é difícil — e por que precisa ser</h2>
+    <div class="dor-solucao">
+      <div class="dor-box dor">
+        <h4>😰 O problema</h4>
+        Adicionar POST requer ler o body manualmente com eventos. Capturar <code style="font-family:var(--mono)">/veiculos/ABC-1234</code> exige fatiar strings. Com 4 entidades × 5 verbos = 20 rotas no mesmo <code style="font-family:var(--mono)">if/else</code>.
+      </div>
+      <div class="dor-box sol">
+        <h4>✅ A solução (etapa 4)</h4>
+        Express nasceu exatamente para resolver essa dor. Ao sentir o problema aqui, você vai entender <em>por que</em> o Express existe — não só <em>como</em> usá-lo.
+      </div>
+    </div>
+
+    <div class="code-block">
+      <span class="file-label">servidor.js — lendo body de um POST (trabalhoso)</span>
+      <span class="k">if</span> (req.method === <span class="s">'POST'</span> && req.url === <span class="s">'/api/v1/veiculos'</span>) {<br>
+      &nbsp;&nbsp;<span class="k">let</span> body = <span class="s">''</span>;<br>
+      <br>
+      &nbsp;&nbsp;<span class="c">// body chega em pedaços (chunks) — temos que montar</span><br>
+      &nbsp;&nbsp;req.<span class="f">on</span>(<span class="s">'data'</span>, chunk => { body += chunk; });<br>
+      <br>
+      &nbsp;&nbsp;req.<span class="f">on</span>(<span class="s">'end'</span>, () => {<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;<span class="k">const</span> dados = <span class="f">JSON.parse</span>(body);<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;<span class="c">// agora sim podemos usar os dados...</span><br>
+      &nbsp;&nbsp;});<br>
+      }
+    </div>
+
+    <div class="callout warn">
+      <span class="callout-icon">⚠️</span>
+      <span><strong>Observe:</strong> o Express vai fazer tudo isso automaticamente com <code style="font-family:var(--mono)">express.json()</code>. Mas só faz sentido apreciar isso depois de ter sentido a dificuldade aqui.</span>
+    </div>
+  </div>
+
+  <!-- REQ E RES -->
+  <div class="section reveal">
+    <div class="section-label">Referência rápida</div>
+    <h2>Os objetos req e res</h2>
+
+    <div class="code-block">
+      <span class="file-label">o que temos em cada requisição</span>
+      <span class="c">// req — o que o CLIENTE enviou</span><br>
+      req.method   <span class="c">// 'GET', 'POST', 'PUT', 'DELETE'</span><br>
+      req.url      <span class="c">// '/api/v1/veiculos'</span><br>
+      req.headers  <span class="c">// { 'content-type': 'application/json', ... }</span><br>
+      <br>
+      <span class="c">// res — o que o SERVIDOR vai devolver</span><br>
+      res.<span class="f">writeHead</span>(<span class="n">200</span>, { <span class="s">'Content-Type'</span>: <span class="s">'application/json'</span> });<br>
+      res.<span class="f">end</span>(conteudo);  <span class="c">// envia e fecha a conexão</span>
+    </div>
+
+    <div class="callout ok">
+      <span class="callout-icon">✅</span>
+      <span><strong>O que aprendemos:</strong> módulo http, createServer, req.method, req.url, res.writeHead, res.end, JSON.stringify, eventos de stream (data/end), e o ciclo completo de uma requisição HTTP.</span>
+    </div>
+  </div>
+
 </div>
 
-<div class="explicacao">
-  <strong>Esta unidade é conceitual.</strong> Não há interface interativa aqui — o objetivo é entender
-  como um servidor HTTP funciona por dentro, antes de usar qualquer framework.
-  Compare o código desta unidade com o da U4 (Express) e veja o que muda.
+<div class="unit-nav">
+  <a href="../u2/index.html">← Etapa 02 — A interface conversa</a>
+  <a href="../u4/index.html">Etapa 04 — A API toma forma →</a>
 </div>
 
-<div class="app">
-
-  <h2>O servidor sem framework</h2>
-
-  <div class="code-block">
-<span class="comment">// servidor.js — Node.js puro, sem Express</span><br>
-<span class="keyword">const</span> http = <span class="fn">require</span>(<span class="string">'http'</span>);<br>
-<br>
-<span class="keyword">const</span> servidor = http.<span class="fn">createServer</span>((req, res) => {<br>
-<br>
-&nbsp;&nbsp;<span class="comment">// precisamos verificar método E URL manualmente</span><br>
-&nbsp;&nbsp;<span class="keyword">if</span> (req.method === <span class="string">'GET'</span> && req.url === <span class="string">'/api/veiculos'</span>) {<br>
-&nbsp;&nbsp;&nbsp;&nbsp;res.<span class="fn">writeHead</span>(<span class="number">200</span>, { <span class="string">'Content-Type'</span>: <span class="string">'application/json'</span> });<br>
-&nbsp;&nbsp;&nbsp;&nbsp;res.<span class="fn">end</span>(<span class="fn">JSON.stringify</span>([{ placa: <span class="string">'ABC-1234'</span>, modelo: <span class="string">'Fiat Ducato'</span> }]));<br>
-<br>
-&nbsp;&nbsp;} <span class="keyword">else if</span> (req.method === <span class="string">'POST'</span> && req.url === <span class="string">'/api/veiculos'</span>) {<br>
-&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">// ler o body manualmente — trabalhoso</span><br>
-&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">let</span> body = <span class="string">''</span>;<br>
-&nbsp;&nbsp;&nbsp;&nbsp;req.<span class="fn">on</span>(<span class="string">'data'</span>, chunk => body += chunk);<br>
-&nbsp;&nbsp;&nbsp;&nbsp;req.<span class="fn">on</span>(<span class="string">'end'</span>, () => {<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">const</span> dados = <span class="fn">JSON.parse</span>(body);<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;res.<span class="fn">writeHead</span>(<span class="number">201</span>, { <span class="string">'Content-Type'</span>: <span class="string">'application/json'</span> });<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;res.<span class="fn">end</span>(<span class="fn">JSON.stringify</span>({ mensagem: <span class="string">'Criado'</span>, dados }));<br>
-&nbsp;&nbsp;&nbsp;&nbsp;});<br>
-<br>
-&nbsp;&nbsp;} <span class="keyword">else</span> {<br>
-&nbsp;&nbsp;&nbsp;&nbsp;res.<span class="fn">writeHead</span>(<span class="number">404</span>);<br>
-&nbsp;&nbsp;&nbsp;&nbsp;res.<span class="fn">end</span>(<span class="fn">JSON.stringify</span>({ erro: <span class="string">'Rota não encontrada'</span> }));<br>
-&nbsp;&nbsp;}<br>
-});<br>
-<br>
-servidor.<span class="fn">listen</span>(<span class="number">3000</span>, () => <span class="fn">console</span>.<span class="fn">log</span>(<span class="string">'Servidor na porta 3000'</span>));
-  </div>
-
-  <div class="problema">
-    🚨 <strong>O problema:</strong> imagine adicionar rotas para veículos, motoristas, oficinas e manutenções —
-    cada uma com GET, POST, PUT e DELETE. Esse <code>if/else</code> cresceria indefinidamente,
-    seria difícil de ler e ainda mais difícil de manter.
-  </div>
-
-  <div class="solucao">
-    ✅ <strong>A solução está na U4:</strong> o Express resolve exatamente isso —
-    organiza as rotas de forma declarativa, lida com o body automaticamente
-    e separa as responsabilidades em arquivos diferentes (MVC).
-  </div>
-
-  <h2>O que este código ensina</h2>
-
-  <div class="code-block">
-<span class="comment">// 1. Todo servidor HTTP recebe dois objetos: req (requisição) e res (resposta)</span><br>
-<span class="comment">// 2. req.method → qual verbo HTTP foi usado (GET, POST, PUT, DELETE)</span><br>
-<span class="comment">// 3. req.url    → qual caminho foi acessado (/api/veiculos)</span><br>
-<span class="comment">// 4. res.writeHead(status, headers) → define o código de resposta</span><br>
-<span class="comment">// 5. res.end(body) → envia a resposta e encerra a conexão</span><br>
-<span class="comment">// 6. O body do POST não chega de uma vez — precisamos "montar" com eventos</span>
-  </div>
-
-</div>
+<footer>IFCE · DW2 · Etapa 03 de 08</footer>
 
 </body>
 </html>

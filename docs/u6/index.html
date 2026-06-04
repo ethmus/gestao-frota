@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Etapa 6 — Quem pode entrar? | Gestão de Frota DW2</title>
+  <link rel="stylesheet" href="../style.css">
+  <style>
+    .login-demo {
+      background: rgba(15,31,61,0.6);
+      border: 1px solid rgba(222,123,140,0.2);
+      border-radius: 10px;
+      padding: 2rem;
+      max-width: 380px;
+      margin: 1.5rem 0;
+    }
+    .login-demo h3 {
+      font-family: var(--serif);
+      font-size: 1.1rem;
+      font-weight: 300;
+      color: var(--text-bright);
+      margin-bottom: 1.2rem;
+      text-align: center;
+    }
+    .login-result {
+      margin-top: 1rem;
+      padding: 0.8rem;
+      border-radius: var(--radius);
+      font-family: var(--mono);
+      font-size: 0.72rem;
+      line-height: 1.7;
+      display: none;
+    }
+    .login-result.ok  { background: rgba(82,201,122,0.08); border: 1px solid rgba(82,201,122,0.2); color: var(--green); display: block; }
+    .login-result.err { background: rgba(224,82,82,0.08);  border: 1px solid rgba(224,82,82,0.2);  color: var(--red);   display: block; }
+
+    .jwt-parts {
+      display: flex;
+      gap: 0.2rem;
+      flex-wrap: wrap;
+      font-family: var(--mono);
+      font-size: 0.72rem;
+      margin: 1rem 0;
+      line-height: 2;
+    }
+    .jwt-header  { color: #E05252; }
+    .jwt-payload { color: #C9A84C; }
+    .jwt-sig     { color: #52C97A; }
+    .jwt-dot     { color: var(--text-dim); }
+
+    .jwt-legend {
+      display: flex;
+      gap: 1.5rem;
+      flex-wrap: wrap;
+      margin-top: 0.5rem;
+    }
+    .jwt-legend span {
+      font-family: var(--mono);
+      font-size: 0.65rem;
+      display: flex;
+      align-items: center;
+      gap: 0.3rem;
+    }
+    .jwt-dot-red    { width: 8px; height: 8px; border-radius: 50%; background: #E05252; }
+    .jwt-dot-gold   { width: 8px; height: 8px; border-radius: 50%; background: #C9A84C; }
+    .jwt-dot-green  { width: 8px; height: 8px; border-radius: 50%; background: #52C97A; }
+
+    .authn-authz {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+      margin: 1rem 0;
+    }
+    @media(max-width:600px) { .authn-authz { grid-template-columns: 1fr; } }
+    .aa-box {
+      border-radius: var(--radius);
+      padding: 1.2rem;
+      font-size: 0.85rem;
+    }
+    .aa-box h4 {
+      font-family: var(--mono);
+      font-size: 0.65rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      margin-bottom: 0.6rem;
+    }
+    .aa-box p { color: var(--text-dim); line-height: 1.6; font-size: 0.82rem; }
+    .authn { background: rgba(222,123,140,0.06); border: 1px solid rgba(222,123,140,0.2); }
+    .authn h4 { color: #DE7B8C; }
+    .authz { background: rgba(123,140,222,0.06); border: 1px solid rgba(123,140,222,0.2); }
+    .authz h4 { color: #7B8CDE; }
+
+    .middleware-flow {
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+      margin: 1rem 0;
+    }
+    .mw-step {
+      display: flex;
+      align-items: center;
+      gap: 0.8rem;
+      padding: 0.8rem 1rem;
+      background: rgba(15,31,61,0.4);
+      border: 1px solid rgba(255,255,255,0.04);
+    }
+    .mw-step:first-child { border-radius: var(--radius) var(--radius) 0 0; }
+    .mw-step:last-child  { border-radius: 0 0 var(--radius) var(--radius); }
+    .mw-icon { font-size: 1.1rem; flex-shrink: 0; }
+    .mw-name { font-family: var(--mono); font-size: 0.75rem; color: var(--text-bright); flex: 1; }
+    .mw-desc { font-size: 0.78rem; color: var(--text-dim); }
+    .mw-pass { font-family: var(--mono); font-size: 0.62rem; color: var(--green); }
+    .mw-fail { font-family: var(--mono); font-size: 0.62rem; color: var(--red); }
+    .mw-arrow { text-align: center; color: var(--text-dim); font-size: 0.8rem; padding: 0.2rem; }
+  </style>
+</head>
+<body>
+
+<nav class="topbar">
+  <a href="../index.html" class="topbar-brand">← Gestão de Frota</a>
+  <span class="topbar-sep">/</span>
+  <span class="topbar-title">Etapa 06</span>
+  <span class="topbar-tag">Sessão · Autenticação · JWT</span>
+</nav>
+
+<section class="unit-hero">
+  <div class="unit-number reveal">Etapa 06 de 08</div>
+  <h1 class="reveal reveal-1">Quem pode <em>entrar?</em></h1>
+  <p class="lead reveal reveal-2">
+    A API está aberta. Qualquer pessoa pode cadastrar veículos, excluir motoristas, limpar oficinas.
+    Esta etapa fecha as portas e instala as chaves. Autenticação identifica <em>quem você é</em>.
+    Autorização decide <em>o que você pode fazer</em>. Sessão lembra <em>que você está aqui</em>.
+  </p>
+  <div class="concepts reveal reveal-3">
+    <span class="concept-tag sec">Autenticação</span>
+    <span class="concept-tag sec">Autorização</span>
+    <span class="concept-tag sec">JWT</span>
+    <span class="concept-tag sec">Sessão</span>
+    <span class="concept-tag sec">Middleware</span>
+    <span class="concept-tag sec">bcrypt</span>
+  </div>
+</section>
+
+<div class="content">
+
+  <!-- ARQUITETURA -->
+  <div class="section reveal">
+    <div class="section-label">Arquitetura — onde estamos</div>
+    <div class="arch-diagram">
+      <div class="arch-box">
+        <div class="arch-label">Etapa 1–5</div>
+        <div class="arch-name">App completo</div>
+      </div>
+      <div class="arch-arrow">→</div>
+      <div class="arch-box active">
+        <div class="arch-label">Etapa atual</div>
+        <div class="arch-name">Auth / Sessão</div>
+      </div>
+      <div class="arch-arrow">→</div>
+      <div class="arch-box">
+        <div class="arch-label">Etapa 7</div>
+        <div class="arch-name">MySQL real</div>
+      </div>
+      <div class="arch-arrow">→</div>
+      <div class="arch-box">
+        <div class="arch-label">Etapa 8</div>
+        <div class="arch-name">Sistema final</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- AUTHN vs AUTHZ -->
+  <div class="section reveal">
+    <div class="section-label">Conceito fundamental</div>
+    <h2>Dois problemas diferentes</h2>
+    <div class="authn-authz">
+      <div class="aa-box authn">
+        <h4>🔑 Autenticação — quem é você?</h4>
+        <p>Verificar que o usuário é quem diz ser. Usuário + senha no banco de dados. Se bater, provamos identidade.</p>
+        <p style="margin-top:0.5rem"><strong style="color:#DE7B8C">Exemplo:</strong> "Você digitou a senha certa para o e-mail joao@email.com"</p>
+      </div>
+      <div class="aa-box authz">
+        <h4>🛡️ Autorização — o que você pode?</h4>
+        <p>Verificar que o usuário autenticado tem permissão para a ação. Um motorista não pode excluir veículos.</p>
+        <p style="margin-top:0.5rem"><strong style="color:#7B8CDE">Exemplo:</strong> "Você está autenticado, mas não tem perfil de admin"</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- JWT -->
+  <div class="section reveal">
+    <div class="section-label">Conceito — JWT</div>
+    <h2>O crachá digital</h2>
+    <p>
+      JSON Web Token é um <strong style="color:var(--text-bright)">token assinado</strong> que o servidor emite após o login.
+      O cliente o guarda e envia em cada requisição. O servidor verifica a assinatura — sem precisar consultar o banco novamente.
+    </p>
+
+    <div class="jwt-parts">
+      <span class="jwt-header">eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9</span>
+      <span class="jwt-dot">.</span>
+      <span class="jwt-payload">eyJ1c2VySWQiOjEsInBlcmZpbCI6ImFkbWluIiwiaWF0IjoxNzE3MjYyfQ</span>
+      <span class="jwt-dot">.</span>
+      <span class="jwt-sig">SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c</span>
+    </div>
+
+    <div class="jwt-legend">
+      <span><span class="jwt-dot-red"></span> Header — algoritmo</span>
+      <span><span class="jwt-dot-gold"></span> Payload — dados do usuário</span>
+      <span><span class="jwt-dot-green"></span> Signature — prova de autenticidade</span>
+    </div>
+
+    <div class="callout tip" style="margin-top:1rem">
+      <span class="callout-icon">💡</span>
+      <span>O payload de um JWT pode ser lido por qualquer pessoa — não coloque senhas nele. A segurança está na <strong>assinatura</strong>, que só o servidor consegue verificar.</span>
+    </div>
+  </div>
+
+  <!-- FLUXO DE LOGIN -->
+  <div class="section reveal">
+    <div class="section-label">Fluxo — login e acesso</div>
+    <h2>Como a autenticação funciona no sistema</h2>
+
+    <div class="code-block">
+      <span class="file-label">routes/authRoutes.js — login</span>
+      <span class="c">// 1. usuário envia e-mail e senha</span><br>
+      router.<span class="f">post</span>(<span class="s">'/login'</span>, <span class="k">async</span> (req, res) => {<br>
+      &nbsp;&nbsp;<span class="k">const</span> { email, senha } = req.body;<br>
+      <br>
+      &nbsp;&nbsp;<span class="c">// 2. busca no banco e compara com bcrypt</span><br>
+      &nbsp;&nbsp;<span class="k">const</span> usuario = <span class="k">await</span> <span class="f">buscarPorEmail</span>(email);<br>
+      &nbsp;&nbsp;<span class="k">const</span> ok = <span class="k">await</span> bcrypt.<span class="f">compare</span>(senha, usuario.senha_hash);<br>
+      <br>
+      &nbsp;&nbsp;<span class="k">if</span> (!ok) <span class="k">return</span> res.<span class="f">status</span>(<span class="n">401</span>).<span class="f">json</span>({ erro: <span class="s">'Credenciais inválidas'</span> });<br>
+      <br>
+      &nbsp;&nbsp;<span class="c">// 3. emite o token JWT</span><br>
+      &nbsp;&nbsp;<span class="k">const</span> token = jwt.<span class="f">sign</span>({ userId: usuario.id }, process.env.JWT_SECRET);<br>
+      &nbsp;&nbsp;res.<span class="f">json</span>({ token });<br>
+      });
+    </div>
+  </div>
+
+  <!-- MIDDLEWARE -->
+  <div class="section reveal">
+    <div class="section-label">Conceito — Middleware de autenticação</div>
+    <h2>O guarda que fica entre a rota e o controller</h2>
+    <p>Um middleware é uma função que roda entre a requisição e o handler final. O middleware de auth verifica o token antes de deixar a requisição chegar no controller.</p>
+
+    <div class="middleware-flow">
+      <div class="mw-step">
+        <span class="mw-icon">🌐</span>
+        <div>
+          <div class="mw-name">Requisição chega</div>
+          <div class="mw-desc">GET /api/v1/veiculos com Authorization: Bearer &lt;token&gt;</div>
+        </div>
+      </div>
+      <div class="mw-arrow">↓</div>
+      <div class="mw-step">
+        <span class="mw-icon">🔐</span>
+        <div>
+          <div class="mw-name">Middleware verificaToken</div>
+          <div class="mw-desc">Extrai e valida o JWT. <span class="mw-pass">✓ válido → next()</span> &nbsp; <span class="mw-fail">✗ inválido → 401</span></div>
+        </div>
+      </div>
+      <div class="mw-arrow">↓</div>
+      <div class="mw-step">
+        <span class="mw-icon">🎮</span>
+        <div>
+          <div class="mw-name">Controller executa</div>
+          <div class="mw-desc">Só chega aqui quem passou pela verificação</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="code-block">
+      <span class="file-label">middlewares/auth.js</span>
+      <span class="k">function</span> <span class="f">verificaToken</span>(req, res, next) {<br>
+      &nbsp;&nbsp;<span class="k">const</span> token = req.headers.authorization?.split(<span class="s">' '</span>)[<span class="n">1</span>];<br>
+      <br>
+      &nbsp;&nbsp;<span class="k">if</span> (!token) <span class="k">return</span> res.<span class="f">status</span>(<span class="n">401</span>).<span class="f">json</span>({ erro: <span class="s">'Token ausente'</span> });<br>
+      <br>
+      &nbsp;&nbsp;<span class="k">try</span> {<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;<span class="k">const</span> payload = jwt.<span class="f">verify</span>(token, process.env.JWT_SECRET);<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;req.usuario = payload;  <span class="c">// disponível no controller</span><br>
+      &nbsp;&nbsp;&nbsp;&nbsp;<span class="f">next</span>();               <span class="c">// passa para o próximo</span><br>
+      &nbsp;&nbsp;} <span class="k">catch</span> {<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;res.<span class="f">status</span>(<span class="n">401</span>).<span class="f">json</span>({ erro: <span class="s">'Token inválido'</span> });<br>
+      &nbsp;&nbsp;}<br>
+      }
+    </div>
+  </div>
+
+  <!-- DEMO LOGIN -->
+  <div class="section reveal">
+    <div class="section-label">Demo — simulação de login</div>
+    <h2>Teste as credenciais do sistema</h2>
+
+    <div class="login-demo">
+      <h3>🔐 Gestão de Frota — Login</h3>
+      <label>E-mail</label>
+      <input type="email" id="login-email" placeholder="admin@frota.com" value="admin@frota.com">
+      <label>Senha</label>
+      <input type="password" id="login-senha" placeholder="••••••••" value="admin123">
+      <button class="btn btn-primary" style="width:100%;margin-top:0.3rem" onclick="simularLogin()">Entrar no sistema</button>
+      <button class="btn btn-ghost" style="width:100%;margin-top:0.5rem" onclick="tentarSenhaErrada()">Tentar senha errada</button>
+      <div id="login-result" class="login-result"></div>
+    </div>
+
+    <div class="callout ok">
+      <span class="callout-icon">✅</span>
+      <span><strong>O que aprendemos:</strong> autenticação vs autorização, hashing de senhas com bcrypt, JWT (criação e verificação), middleware pattern, req.headers.authorization, e proteção de rotas.</span>
+    </div>
+  </div>
+
+</div>
+
+<div class="unit-nav">
+  <a href="../u5/index.html">← Etapa 05 — O código se organiza</a>
+  <a href="../u7/index.html">Etapa 07 — Os dados persistem →</a>
+</div>
+
+<footer>IFCE · DW2 · Etapa 06 de 08</footer>
+
+<script>
+function simularLogin() {
+  const email = document.getElementById('login-email').value;
+  const senha = document.getElementById('login-senha').value;
+  const res = document.getElementById('login-result');
+
+  if (email === 'admin@frota.com' && senha === 'admin123') {
+    res.className = 'login-result ok';
+    res.innerHTML = `✓ Login realizado com sucesso<br>
+Token gerado:<br>
+eyJhbGciOiJIUzI1NiJ9.<span style="color:var(--gold)">eyJ1c2VySWQiOjEsInBlcmZpbCI6ImFkbWluIn0</span>.SflKxwRJ...<br>
+<br>
+Payload decodificado:<br>
+{ userId: 1, perfil: "admin", iat: ${Math.floor(Date.now()/1000)} }`;
+  } else {
+    res.className = 'login-result err';
+    res.innerHTML = `✗ HTTP 401 Unauthorized<br>{ "erro": "Credenciais inválidas" }`;
+  }
+}
+
+function tentarSenhaErrada() {
+  document.getElementById('login-senha').value = 'senha_errada';
+  simularLogin();
+}
+</script>
+</body>
+</html>

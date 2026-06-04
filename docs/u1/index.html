@@ -3,177 +3,320 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>U1 — Interface Estática | Gestão de Frota</title>
+  <title>Etapa 1 — A interface nasce | Gestão de Frota DW2</title>
+  <link rel="stylesheet" href="../style.css">
   <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-    body { font-family: 'Segoe UI', Arial, sans-serif; background: #f0f4f8; color: #1a202c; }
-
-    .topbar {
-      background: #1E3A8A;
-      color: white;
-      padding: 0.8rem 1.5rem;
+    .demo-controls {
       display: flex;
-      align-items: center;
-      gap: 1rem;
+      gap: 0.6rem;
+      flex-wrap: wrap;
+      margin-bottom: 1rem;
     }
-    .topbar a { color: #93c5fd; font-size: 0.85rem; text-decoration: none; }
-    .topbar a:hover { text-decoration: underline; }
-    .topbar span { color: white; font-weight: 600; }
-
-    .unidade-badge {
-      background: #1E88E5;
-      color: white;
-      font-size: 0.75rem;
-      padding: 0.2rem 0.7rem;
-      border-radius: 999px;
-      margin-left: auto;
-    }
-
-    .explicacao {
-      background: #EBF4FF;
-      border-left: 4px solid #1E88E5;
-      padding: 1rem 1.5rem;
-      font-size: 0.9rem;
-      color: #1a365d;
-      line-height: 1.6;
-    }
-
-    .app {
-      max-width: 860px;
-      margin: 2rem auto;
-      padding: 0 1rem;
-    }
-
-    .app-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 1.5rem;
-    }
-
-    .app-header h1 { font-size: 1.4rem; color: #1E3A8A; }
-
-    .btn {
-      background: #1E88E5;
-      color: white;
-      border: none;
-      padding: 0.6rem 1.2rem;
-      border-radius: 6px;
-      font-size: 0.9rem;
+    .filter-btn {
+      font-family: var(--mono);
+      font-size: 0.68rem;
+      letter-spacing: 0.08em;
+      padding: 0.35rem 0.8rem;
+      border-radius: 4px;
+      border: 1px solid rgba(255,255,255,0.1);
+      background: transparent;
+      color: var(--text-dim);
       cursor: pointer;
+      transition: all 0.2s;
+      text-transform: uppercase;
     }
-
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      background: white;
-      border-radius: 8px;
-      overflow: hidden;
-      box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+    .filter-btn.active, .filter-btn:hover {
+      border-color: var(--gold);
+      color: var(--gold);
+      background: rgba(201,168,76,0.08);
     }
+    .event-log {
+      background: rgba(11,22,40,0.8);
+      border: 1px solid rgba(78,205,196,0.15);
+      border-radius: var(--radius);
+      padding: 0.8rem 1rem;
+      font-family: var(--mono);
+      font-size: 0.72rem;
+      color: var(--cyan);
+      height: 80px;
+      overflow-y: auto;
+      margin-top: 0.8rem;
+    }
+    .event-log .log-line { opacity: 0.7; line-height: 1.8; }
+    .event-log .log-line.new { opacity: 1; color: var(--gold); }
 
-    thead { background: #1E3A8A; color: white; }
-    thead th { padding: 0.9rem 1rem; text-align: left; font-size: 0.85rem; }
-    tbody tr { border-bottom: 1px solid #e2e8f0; }
-    tbody tr:last-child { border: none; }
-    tbody td { padding: 0.85rem 1rem; font-size: 0.9rem; }
-
-    .status {
-      display: inline-block;
-      padding: 0.2rem 0.6rem;
-      border-radius: 999px;
+    .dom-explorer {
+      background: rgba(11,22,40,0.8);
+      border: 1px solid rgba(255,255,255,0.06);
+      border-radius: var(--radius);
+      padding: 1rem;
+      font-family: var(--mono);
       font-size: 0.75rem;
-      font-weight: 600;
+      line-height: 2;
     }
-    .ativo { background: #D1FAE5; color: #065F46; }
-    .manutencao { background: #FEF3C7; color: #92400E; }
-    .inativo { background: #FEE2E2; color: #991B1B; }
-
-    .nota {
-      background: #FFFBEB;
-      border: 1px solid #FCD34D;
-      border-radius: 6px;
-      padding: 1rem 1.2rem;
-      margin-top: 1.5rem;
-      font-size: 0.85rem;
-      color: #78350F;
-      line-height: 1.6;
-    }
+    .dom-explorer .tag { color: var(--cyan); }
+    .dom-explorer .attr { color: var(--gold); }
+    .dom-explorer .val  { color: #86efac; }
+    .dom-explorer .text { color: var(--text-dim); }
+    .dom-explorer .indent { display: inline-block; width: 20px; }
   </style>
 </head>
 <body>
 
-<div class="topbar">
-  <a href="../index.html">← Voltar ao início</a>
-  <span>Unidade 1 — Interface Estática</span>
-  <span class="unidade-badge">HTML + CSS</span>
-</div>
+<nav class="topbar">
+  <a href="../index.html" class="topbar-brand">← Gestão de Frota</a>
+  <span class="topbar-sep">/</span>
+  <span class="topbar-title">Etapa 01</span>
+  <span class="topbar-tag">HTML · CSS · JS · DOM</span>
+</nav>
 
-<div class="explicacao">
-  <strong>O que foi feito nesta unidade:</strong> estrutura HTML semântica, estilização com CSS puro, tabela de dados com status visual.
-  Os dados estão escritos diretamente no HTML — sem JavaScript, sem servidor, sem banco de dados.
-</div>
+<section class="unit-hero">
+  <div class="unit-number reveal">Etapa 01 de 08</div>
+  <h1 class="reveal reveal-1">A interface <em>nasce</em></h1>
+  <p class="lead reveal reveal-2">
+    Tudo começa aqui. HTML estrutura o conteúdo, CSS dá forma e cor,
+    JavaScript dá vida. Nesta etapa, a tela de veículos existe como um organismo
+    que responde ao usuário — sem servidor, sem banco de dados, sem magia.
+    Só código do lado do cliente.
+  </p>
+  <div class="concepts reveal reveal-3">
+    <span class="concept-tag html">HTML semântico</span>
+    <span class="concept-tag css">CSS</span>
+    <span class="concept-tag js">JavaScript</span>
+    <span class="concept-tag js">DOM</span>
+    <span class="concept-tag js">Eventos</span>
+  </div>
+</section>
 
-<div class="app">
-  <div class="app-header">
-    <h1>🚛 Veículos da Frota</h1>
-    <button class="btn">+ Novo Veículo</button>
+<div class="content">
+
+  <!-- ONDE ESTAMOS -->
+  <div class="section reveal">
+    <div class="section-label">Arquitetura — onde estamos</div>
+    <div class="arch-diagram">
+      <div class="arch-box active">
+        <div class="arch-label">Etapa atual</div>
+        <div class="arch-name">Front-end</div>
+      </div>
+      <div class="arch-arrow">→</div>
+      <div class="arch-box">
+        <div class="arch-label">Etapa 2</div>
+        <div class="arch-name">Fetch API</div>
+      </div>
+      <div class="arch-arrow">→</div>
+      <div class="arch-box">
+        <div class="arch-label">Etapa 3–4</div>
+        <div class="arch-name">Node / Express</div>
+      </div>
+      <div class="arch-arrow">→</div>
+      <div class="arch-box">
+        <div class="arch-label">Etapa 7</div>
+        <div class="arch-name">MySQL</div>
+      </div>
+    </div>
+    <p>Neste momento, o navegador é o único ator. Ele baixa o HTML, renderiza o CSS e executa o JavaScript — tudo localmente, sem nenhuma chamada a um servidor.</p>
   </div>
 
-  <table>
-    <thead>
-      <tr>
-        <th>Placa</th>
-        <th>Modelo</th>
-        <th>Ano</th>
-        <th>Km Atual</th>
-        <th>Status</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr>
-        <td>ABC-1234</td>
-        <td>Fiat Ducato</td>
-        <td>2021</td>
-        <td>48.200 km</td>
-        <td><span class="status ativo">Ativo</span></td>
-      </tr>
-      <tr>
-        <td>DEF-5678</td>
-        <td>Mercedes Sprinter</td>
-        <td>2019</td>
-        <td>112.400 km</td>
-        <td><span class="status manutencao">Manutenção</span></td>
-      </tr>
-      <tr>
-        <td>GHI-9012</td>
-        <td>Volkswagen Delivery</td>
-        <td>2022</td>
-        <td>21.800 km</td>
-        <td><span class="status ativo">Ativo</span></td>
-      </tr>
-      <tr>
-        <td>JKL-3456</td>
-        <td>Ford Cargo</td>
-        <td>2017</td>
-        <td>198.000 km</td>
-        <td><span class="status inativo">Inativo</span></td>
-      </tr>
-      <tr>
-        <td>MNO-7890</td>
-        <td>Iveco Daily</td>
-        <td>2020</td>
-        <td>67.300 km</td>
-        <td><span class="status ativo">Ativo</span></td>
-      </tr>
-    </tbody>
-  </table>
+  <!-- O QUE É O DOM -->
+  <div class="section reveal">
+    <div class="section-label">Conceito — DOM</div>
+    <h2>O navegador lê HTML e cria uma árvore</h2>
+    <p>
+      Quando o navegador carrega uma página, ele transforma o HTML em uma estrutura de objetos chamada <strong style="color:var(--cyan)">DOM — Document Object Model</strong>.
+      É essa árvore que o JavaScript manipula para mudar o que aparece na tela sem recarregar a página.
+    </p>
 
-  <div class="nota">
-    ⚠️ <strong>Observe:</strong> esses dados estão escritos diretamente no HTML. Se você inspecionar o código-fonte da página,
-    vai encontrar cada linha da tabela como texto estático. Na Unidade 2, esses mesmos dados virão de um servidor.
+    <div class="dom-explorer">
+      <span class="tag">&lt;table</span> <span class="attr">id</span>=<span class="val">"tabela-veiculos"</span><span class="tag">&gt;</span><br>
+      <span class="indent"></span><span class="tag">&lt;thead&gt;</span><br>
+      <span class="indent"></span><span class="indent"></span><span class="tag">&lt;tr&gt;</span><span class="tag">&lt;th&gt;</span><span class="text">Placa</span><span class="tag">&lt;/th&gt;</span><span class="tag">&lt;th&gt;</span><span class="text">Modelo</span><span class="tag">&lt;/th&gt;</span><span class="tag">&lt;/tr&gt;</span><br>
+      <span class="indent"></span><span class="tag">&lt;/thead&gt;</span><br>
+      <span class="indent"></span><span class="tag">&lt;tbody</span> <span class="attr">id</span>=<span class="val">"tbody"</span><span class="tag">&gt;</span>  <span class="text">← JavaScript escreve aqui</span><br>
+      <span class="indent"></span><span class="tag">&lt;/tbody&gt;</span><br>
+      <span class="tag">&lt;/table&gt;</span>
+    </div>
+
+    <div class="code-block">
+      <span class="file-label">app.js</span>
+      <span class="c">// Acessar um elemento pelo id</span><br>
+      <span class="k">const</span> tbody = document.<span class="f">getElementById</span>(<span class="s">'tbody'</span>);<br>
+      <br>
+      <span class="c">// Criar uma nova linha e inserir no DOM</span><br>
+      <span class="k">const</span> linha = document.<span class="f">createElement</span>(<span class="s">'tr'</span>);<br>
+      linha.innerHTML = <span class="s">`&lt;td&gt;ABC-1234&lt;/td&gt;&lt;td&gt;Fiat Ducato&lt;/td&gt;`</span>;<br>
+      tbody.<span class="f">appendChild</span>(linha);<br>
+    </div>
   </div>
+
+  <!-- EVENTOS -->
+  <div class="section reveal">
+    <div class="section-label">Conceito — Eventos</div>
+    <h2>O usuário age, o JavaScript reage</h2>
+    <p>
+      Eventos são sinais que o navegador emite quando o usuário faz algo — clica, digita, passa o mouse.
+      Com <code style="color:var(--cyan);font-family:var(--mono)">addEventListener</code>, registramos uma função para ser executada quando o evento acontecer.
+    </p>
+
+    <div class="code-block">
+      <span class="file-label">app.js</span>
+      <span class="c">// Quando o botão for clicado, chama a função</span><br>
+      document.<span class="f">getElementById</span>(<span class="s">'btn-filtrar'</span>)<br>
+      &nbsp;&nbsp;.<span class="f">addEventListener</span>(<span class="s">'click'</span>, <span class="k">function</span>() {<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;<span class="f">filtrarVeiculos</span>(<span class="s">'ativo'</span>);<br>
+      &nbsp;&nbsp;});<br>
+    </div>
+  </div>
+
+  <!-- DEMO -->
+  <div class="section reveal">
+    <div class="section-label">Demo — Sistema em funcionamento</div>
+    <h2>A tela de veículos — dados estáticos, comportamento real</h2>
+    <p>Os dados abaixo estão escritos diretamente no JavaScript — sem servidor. Mas os filtros, a busca e os eventos funcionam de verdade. Interaja.</p>
+
+    <div class="demo-frame">
+      <div class="demo-toolbar">
+        <div class="demo-dot red"></div>
+        <div class="demo-dot yellow"></div>
+        <div class="demo-dot green"></div>
+        <div class="demo-url">gestao-frota/veiculos</div>
+      </div>
+      <div class="demo-body">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;flex-wrap:wrap;gap:0.5rem">
+          <span style="font-family:var(--serif);font-size:1.1rem;color:var(--text-bright)">🚛 Veículos da Frota</span>
+          <input type="text" id="busca" placeholder="Buscar por modelo ou placa..." style="width:220px;margin:0">
+        </div>
+
+        <div class="demo-controls">
+          <button class="filter-btn active" onclick="filtrar('todos', this)">Todos</button>
+          <button class="filter-btn" onclick="filtrar('ativo', this)">Ativos</button>
+          <button class="filter-btn" onclick="filtrar('manutencao', this)">Manutenção</button>
+          <button class="filter-btn" onclick="filtrar('inativo', this)">Inativos</button>
+        </div>
+
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Placa</th>
+              <th>Modelo</th>
+              <th>Ano</th>
+              <th>Km</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody id="tbody-u1"></tbody>
+        </table>
+
+        <div class="event-log" id="log">
+          <div class="log-line">// console de eventos — interaja com a tabela acima</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="callout tip">
+      <span class="callout-icon">💡</span>
+      <span>Abra o DevTools (F12 → Elements) e observe a árvore DOM enquanto filtra. Veja as linhas da tabela sendo adicionadas e removidas em tempo real.</span>
+    </div>
+  </div>
+
+  <!-- CÓDIGO COMPLETO -->
+  <div class="section reveal">
+    <div class="section-label">Código — o que foi necessário</div>
+    <h2>Estrutura desta etapa</h2>
+
+    <div class="code-block">
+      <span class="file-label">estrutura de arquivos</span>
+      <span class="n">gestao-frota/</span><br>
+      <span class="p">├── </span><span class="s">index.html</span>   <span class="c">← estrutura semântica</span><br>
+      <span class="p">├── </span><span class="s">style.css</span>    <span class="c">← visual e responsividade</span><br>
+      <span class="p">└── </span><span class="s">app.js</span>       <span class="c">← DOM + eventos + lógica</span><br>
+    </div>
+
+    <div class="callout warn">
+      <span class="callout-icon">⚠️</span>
+      <span><strong>Observe o limite desta etapa:</strong> os dados estão no código JavaScript. Se fechar o navegador e abrir de novo, nada muda — não há persistência. Isso será resolvido na Etapa 7.</span>
+    </div>
+
+    <div class="callout ok">
+      <span class="callout-icon">✅</span>
+      <span><strong>O que aprendemos:</strong> HTML semântico, seletores CSS, querySelector, getElementById, addEventListener, innerHTML, template literals, arrow functions e manipulação de classes CSS.</span>
+    </div>
+  </div>
+
 </div>
 
+<div class="unit-nav">
+  <a href="../index.html">← Início</a>
+  <a href="../u2/index.html">Etapa 02 — A interface conversa →</a>
+</div>
+
+<footer>IFCE · DW2 · Etapa 01 de 08</footer>
+
+<script>
+const veiculos = [
+  { placa: 'ABC-1234', modelo: 'Fiat Ducato',          ano: 2021, km: 48200,  status: 'ativo' },
+  { placa: 'DEF-5678', modelo: 'Mercedes Sprinter',    ano: 2019, km: 112400, status: 'manutencao' },
+  { placa: 'GHI-9012', modelo: 'Volkswagen Delivery',  ano: 2022, km: 21800,  status: 'ativo' },
+  { placa: 'JKL-3456', modelo: 'Ford Cargo',           ano: 2017, km: 198000, status: 'inativo' },
+  { placa: 'MNO-7890', modelo: 'Iveco Daily',          ano: 2020, km: 67300,  status: 'ativo' },
+];
+
+let filtroAtual = 'todos';
+const tbody = document.getElementById('tbody-u1');
+const log   = document.getElementById('log');
+
+function logEvento(msg) {
+  const div = document.createElement('div');
+  div.className = 'log-line new';
+  div.textContent = '> ' + msg;
+  log.querySelectorAll('.new').forEach(el => el.classList.remove('new'));
+  log.appendChild(div);
+  log.scrollTop = log.scrollHeight;
+}
+
+function badgeHTML(s) {
+  return `<span class="badge ${s}">${s === 'manutencao' ? 'Manutenção' : s.charAt(0).toUpperCase() + s.slice(1)}</span>`;
+}
+
+function renderizar(lista) {
+  tbody.innerHTML = lista.length === 0
+    ? '<tr><td colspan="5" class="loading">Nenhum veículo encontrado</td></tr>'
+    : lista.map(v => `
+        <tr>
+          <td style="font-family:var(--mono);font-size:0.8rem">${v.placa}</td>
+          <td>${v.modelo}</td>
+          <td>${v.ano}</td>
+          <td style="font-family:var(--mono);font-size:0.8rem">${v.km.toLocaleString('pt-BR')} km</td>
+          <td>${badgeHTML(v.status)}</td>
+        </tr>`).join('');
+}
+
+function filtrar(status, btn) {
+  filtroAtual = status;
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  if (btn) btn.classList.add('active');
+  const busca = document.getElementById('busca').value.toLowerCase();
+  const lista = veiculos.filter(v =>
+    (status === 'todos' || v.status === status) &&
+    (v.modelo.toLowerCase().includes(busca) || v.placa.toLowerCase().includes(busca))
+  );
+  renderizar(lista);
+  logEvento(`filtro aplicado: "${status}" — ${lista.length} veículo(s) exibido(s)`);
+}
+
+document.getElementById('busca').addEventListener('input', function() {
+  filtrar(filtroAtual, null);
+  logEvento(`busca: "${this.value}" — evento: input`);
+});
+
+document.querySelectorAll('.filter-btn').forEach(btn => {
+  btn.addEventListener('mouseover', function() {
+    logEvento(`evento mouseover em [${this.textContent}]`);
+  });
+});
+
+// Init
+renderizar(veiculos);
+logEvento('DOM carregado — 5 veículos renderizados');
+</script>
 </body>
 </html>

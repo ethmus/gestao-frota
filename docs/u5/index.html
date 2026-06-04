@@ -3,344 +3,322 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>U5 — Sistema Completo | Gestão de Frota</title>
+  <title>Etapa 5 — O código se organiza | Gestão de Frota DW2</title>
+  <link rel="stylesheet" href="../style.css">
   <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-    body { font-family: 'Segoe UI', Arial, sans-serif; background: #f0f4f8; color: #1a202c; }
-
-    .topbar {
-      background: #1E3A8A; color: white;
-      padding: 0.8rem 1.5rem;
-      display: flex; align-items: center; gap: 1rem;
+    .mvc-diagram {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1rem;
+      margin: 1.5rem 0;
     }
-    .topbar a { color: #93c5fd; font-size: 0.85rem; text-decoration: none; }
-    .topbar span { color: white; font-weight: 600; }
-    .unidade-badge {
-      background: #1E88E5; color: white;
-      font-size: 0.75rem; padding: 0.2rem 0.7rem;
-      border-radius: 999px; margin-left: auto;
+    @media(max-width:600px) { .mvc-diagram { grid-template-columns: 1fr; } }
+
+    .mvc-box {
+      border-radius: var(--radius);
+      padding: 1.2rem;
+      position: relative;
     }
+    .mvc-box.model   { background: rgba(123,140,222,0.08); border: 1px solid rgba(123,140,222,0.25); }
+    .mvc-box.view    { background: rgba(224,82,82,0.08);   border: 1px solid rgba(224,82,82,0.25); }
+    .mvc-box.ctrl    { background: rgba(78,205,196,0.08);  border: 1px solid rgba(78,205,196,0.25); }
 
-    .explicacao {
-      background: #EBF4FF; border-left: 4px solid #1E88E5;
-      padding: 1rem 1.5rem; font-size: 0.9rem; color: #1a365d; line-height: 1.6;
+    .mvc-letter {
+      font-family: var(--serif);
+      font-size: 2.5rem;
+      font-weight: 300;
+      line-height: 1;
+      margin-bottom: 0.5rem;
     }
+    .mvc-box.model .mvc-letter { color: rgba(123,140,222,0.6); }
+    .mvc-box.view  .mvc-letter { color: rgba(224,82,82,0.6); }
+    .mvc-box.ctrl  .mvc-letter { color: rgba(78,205,196,0.6); }
 
-    .app { max-width: 900px; margin: 2rem auto; padding: 0 1rem; }
-
-    .tabs { display: flex; gap: 0.5rem; margin-bottom: 1.5rem; flex-wrap: wrap; }
-
-    .tab {
-      background: white; border: 2px solid #e2e8f0;
-      border-radius: 6px; padding: 0.5rem 1rem;
-      font-size: 0.88rem; cursor: pointer;
-      transition: all 0.15s;
+    .mvc-name {
+      font-family: var(--mono);
+      font-size: 0.7rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      margin-bottom: 0.5rem;
     }
-    .tab.ativo { background: #1E3A8A; border-color: #1E3A8A; color: white; }
+    .mvc-box.model .mvc-name { color: #7B8CDE; }
+    .mvc-box.view  .mvc-name { color: #E05252; }
+    .mvc-box.ctrl  .mvc-name { color: #4ECDC4; }
 
-    .painel { display: none; }
-    .painel.ativo { display: block; }
-
-    .app-header {
-      display: flex; justify-content: space-between;
-      align-items: center; margin-bottom: 1rem;
+    .mvc-desc { font-size: 0.82rem; color: var(--text-dim); line-height: 1.5; }
+    .mvc-files { margin-top: 0.7rem; }
+    .mvc-file {
+      font-family: var(--mono);
+      font-size: 0.68rem;
+      color: var(--text-dim);
+      padding: 0.1rem 0;
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
     }
-    .app-header h2 { font-size: 1.2rem; color: #1E3A8A; text-transform: none; letter-spacing: 0; }
+    .mvc-file::before { content: '├'; color: rgba(255,255,255,0.15); }
 
-    .btn {
-      background: #1E88E5; color: white;
-      border: none; padding: 0.55rem 1.1rem;
-      border-radius: 6px; font-size: 0.88rem; cursor: pointer;
+    .flow-step {
+      display: flex;
+      align-items: flex-start;
+      gap: 1rem;
+      padding: 1rem 0;
+      border-bottom: 1px solid rgba(255,255,255,0.04);
     }
-    .btn-danger { background: #EF4444; }
-    .btn-sm { padding: 0.3rem 0.7rem; font-size: 0.78rem; }
-
-    table {
-      width: 100%; border-collapse: collapse;
-      background: white; border-radius: 8px;
-      overflow: hidden; box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+    .flow-step:last-child { border: none; }
+    .flow-num {
+      font-family: var(--mono);
+      font-size: 0.65rem;
+      background: rgba(255,255,255,0.06);
+      border-radius: 50%;
+      width: 24px;
+      height: 24px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      color: var(--gold);
+      margin-top: 0.1rem;
     }
-    thead { background: #1E3A8A; color: white; }
-    thead th { padding: 0.8rem 1rem; text-align: left; font-size: 0.82rem; }
-    tbody tr { border-bottom: 1px solid #e2e8f0; }
-    tbody tr:last-child { border: none; }
-    tbody td { padding: 0.75rem 1rem; font-size: 0.88rem; }
+    .flow-content { flex: 1; }
+    .flow-title { font-size: 0.88rem; color: var(--text-bright); margin-bottom: 0.2rem; }
+    .flow-detail { font-family: var(--mono); font-size: 0.72rem; color: var(--text-dim); }
 
-    .status { display: inline-block; padding: 0.2rem 0.6rem; border-radius: 999px; font-size: 0.72rem; font-weight: 600; }
-    .ativo { background: #D1FAE5; color: #065F46; }
-    .manutencao { background: #FEF3C7; color: #92400E; }
-    .inativo { background: #FEE2E2; color: #991B1B; }
-
-    .loading { text-align: center; padding: 1.5rem; color: #718096; font-size: 0.88rem; }
-
-    .modal-overlay {
-      display: none; position: fixed; inset: 0;
-      background: rgba(0,0,0,0.5); z-index: 100;
-      align-items: center; justify-content: center;
+    .file-tree {
+      background: rgba(11,22,40,0.8);
+      border: 1px solid rgba(255,255,255,0.06);
+      border-radius: var(--radius);
+      padding: 1rem 1.2rem;
+      font-family: var(--mono);
+      font-size: 0.78rem;
+      line-height: 2;
     }
-    .modal-overlay.visivel { display: flex; }
-
-    .modal {
-      background: white; border-radius: 10px;
-      padding: 1.5rem; width: 100%; max-width: 440px;
-      box-shadow: 0 10px 40px rgba(0,0,0,0.2);
-    }
-    .modal h3 { font-size: 1rem; color: #1E3A8A; margin-bottom: 1rem; }
-
-    label { display: block; font-size: 0.82rem; color: #4a5568; margin-bottom: 0.2rem; }
-    input, select {
-      width: 100%; border: 1px solid #CBD5E0;
-      border-radius: 6px; padding: 0.5rem 0.8rem;
-      font-size: 0.88rem; margin-bottom: 0.8rem;
-    }
-    input:focus, select:focus { outline: none; border-color: #1E88E5; }
-
-    .modal-actions { display: flex; gap: 0.6rem; justify-content: flex-end; margin-top: 0.5rem; }
-    .btn-cancel { background: #e2e8f0; color: #4a5568; border: none; padding: 0.55rem 1.1rem; border-radius: 6px; cursor: pointer; font-size: 0.88rem; }
-
-    .arquitetura {
-      background: #1e293b; color: #e2e8f0;
-      border-radius: 8px; padding: 1.2rem;
-      font-family: 'Consolas', monospace; font-size: 0.82rem; line-height: 1.8;
-      margin-top: 1.5rem;
-    }
-    .comment { color: #64748b; }
-    .keyword { color: #7dd3fc; }
-    .string { color: #86efac; }
-    .fn { color: #fbbf24; }
+    .ft-dir  { color: var(--gold); }
+    .ft-file { color: var(--text-dim); }
+    .ft-comment { color: rgba(255,255,255,0.2); }
+    .ft-hl  { color: var(--cyan); }
   </style>
 </head>
 <body>
 
-<div class="topbar">
-  <a href="../index.html">← Voltar ao início</a>
-  <span>Unidade 5 — Sistema Completo</span>
-  <span class="unidade-badge">MySQL + MVC</span>
-</div>
+<nav class="topbar">
+  <a href="../index.html" class="topbar-brand">← Gestão de Frota</a>
+  <span class="topbar-sep">/</span>
+  <span class="topbar-title">Etapa 05</span>
+  <span class="topbar-tag">MVC · Front Controller · Arquitetura</span>
+</nav>
 
-<div class="explicacao">
-  <strong>Sistema completo:</strong> front-end → Fetch API → Express → mysql2 → frota_db.
-  Os dados são reais e persistentes. Cadastre, edite e exclua — as alterações ficam no banco.
-</div>
-
-<div class="app">
-
-  <div class="tabs">
-    <button class="tab ativo" onclick="mudarTab('veiculos', this)">🚛 Veículos</button>
-    <button class="tab" onclick="mudarTab('motoristas', this)">👤 Motoristas</button>
-    <button class="tab" onclick="mudarTab('oficinas', this)">🔧 Oficinas</button>
+<section class="unit-hero">
+  <div class="unit-number reveal">Etapa 05 de 08</div>
+  <h1 class="reveal reveal-1">O código <em>se organiza</em></h1>
+  <p class="lead reveal reveal-2">
+    Uma API com 4 entidades e 5 verbos cada cresce rápido. Sem estrutura, o <code style="font-family:var(--mono)">app.js</code>
+    vira um arquivo de 500 linhas ilegíveis. MVC e Front Controller são os padrões que impedem isso —
+    cada arquivo tem uma responsabilidade única, e o projeto escala sem entrar em colapso.
+  </p>
+  <div class="concepts reveal reveal-3">
+    <span class="concept-tag node">MVC</span>
+    <span class="concept-tag node">Front Controller</span>
+    <span class="concept-tag node">Separação de responsabilidades</span>
+    <span class="concept-tag node">Modularidade</span>
   </div>
+</section>
 
-  <!-- VEÍCULOS -->
-  <div class="painel ativo" id="painel-veiculos">
-    <div class="app-header">
-      <h2>Veículos</h2>
-      <button class="btn" onclick="abrirModal('veiculo')">+ Novo Veículo</button>
-    </div>
-    <table>
-      <thead>
-        <tr><th>Placa</th><th>Modelo</th><th>Ano</th><th>Km</th><th>Status</th><th></th></tr>
-      </thead>
-      <tbody id="tbody-veiculos">
-        <tr><td colspan="6" class="loading">Carregando...</td></tr>
-      </tbody>
-    </table>
-  </div>
+<div class="content">
 
-  <!-- MOTORISTAS -->
-  <div class="painel" id="painel-motoristas">
-    <div class="app-header">
-      <h2>Motoristas</h2>
-      <button class="btn" onclick="abrirModal('motorista')">+ Novo Motorista</button>
-    </div>
-    <table>
-      <thead>
-        <tr><th>Nome</th><th>CNH</th><th>Categoria</th><th>Validade CNH</th><th></th></tr>
-      </thead>
-      <tbody id="tbody-motoristas">
-        <tr><td colspan="5" class="loading">Carregando...</td></tr>
-      </tbody>
-    </table>
-  </div>
-
-  <!-- OFICINAS -->
-  <div class="painel" id="painel-oficinas">
-    <div class="app-header">
-      <h2>Oficinas</h2>
-      <button class="btn" onclick="abrirModal('oficina')">+ Nova Oficina</button>
-    </div>
-    <table>
-      <thead>
-        <tr><th>Nome</th><th>Cidade</th><th>Telefone</th><th>Especialidade</th><th></th></tr>
-      </thead>
-      <tbody id="tbody-oficinas">
-        <tr><td colspan="5" class="loading">Carregando...</td></tr>
-      </tbody>
-    </table>
-  </div>
-
-  <div class="arquitetura" style="margin-top:2rem">
-    <span class="comment">// Fluxo completo — Unidade 5</span><br>
-    <span class="comment">// FRONT-END (GitHub Pages)</span><br>
-    &nbsp;&nbsp;<span class="fn">fetch</span>(<span class="string">'https://gestao-frota-api.up.railway.app/api/v1/veiculos'</span>)<br>
-    &nbsp;&nbsp;&nbsp;&nbsp;→ <span class="comment">// HTTP GET</span><br>
-    <span class="comment">// BACK-END (Railway)</span><br>
-    &nbsp;&nbsp;veiculoRoutes.js → veiculoController.js → veiculoModel.js<br>
-    &nbsp;&nbsp;&nbsp;&nbsp;→ <span class="comment">// mysql2/promise</span><br>
-    <span class="comment">// BANCO DE DADOS (Railway MySQL)</span><br>
-    &nbsp;&nbsp;<span class="keyword">SELECT</span> * <span class="keyword">FROM</span> VEICULO;<br>
-    &nbsp;&nbsp;&nbsp;&nbsp;→ <span class="comment">// JSON de volta ao front</span>
-  </div>
-
-</div>
-
-<!-- MODAL VEÍCULO -->
-<div class="modal-overlay" id="modal-veiculo">
-  <div class="modal">
-    <h3>Novo Veículo</h3>
-    <label>Placa</label>
-    <input type="text" id="v-placa" placeholder="ABC-1234" maxlength="8">
-    <label>Modelo</label>
-    <input type="text" id="v-modelo" placeholder="Fiat Ducato">
-    <label>Ano</label>
-    <input type="number" id="v-ano" placeholder="2022" min="1990" max="2030">
-    <label>Km Atual</label>
-    <input type="number" id="v-km" placeholder="0">
-    <label>Status</label>
-    <select id="v-status">
-      <option value="ativo">Ativo</option>
-      <option value="manutencao">Manutenção</option>
-      <option value="inativo">Inativo</option>
-    </select>
-    <div class="modal-actions">
-      <button class="btn-cancel" onclick="fecharModal('veiculo')">Cancelar</button>
-      <button class="btn" onclick="salvarVeiculo()">Salvar</button>
+  <!-- ARQUITETURA -->
+  <div class="section reveal">
+    <div class="section-label">Arquitetura — onde estamos</div>
+    <div class="arch-diagram">
+      <div class="arch-box">
+        <div class="arch-label">Etapa 1–2</div>
+        <div class="arch-name">Front-end</div>
+      </div>
+      <div class="arch-arrow">→</div>
+      <div class="arch-box">
+        <div class="arch-label">Etapa 3–4</div>
+        <div class="arch-name">Node / REST</div>
+      </div>
+      <div class="arch-arrow">→</div>
+      <div class="arch-box active">
+        <div class="arch-label">Etapa atual</div>
+        <div class="arch-name">MVC</div>
+      </div>
+      <div class="arch-arrow">→</div>
+      <div class="arch-box">
+        <div class="arch-label">Etapa 7</div>
+        <div class="arch-name">MySQL</div>
+      </div>
     </div>
   </div>
+
+  <!-- O PROBLEMA -->
+  <div class="section reveal">
+    <div class="section-label">O problema que MVC resolve</div>
+    <h2>Um arquivo que faz tudo não é manutenível</h2>
+
+    <div class="code-block" style="border-left-color:var(--red)">
+      <span class="file-label">app.js — sem MVC (problema)</span>
+      <span class="c">// rotas, lógica e dados tudo no mesmo arquivo</span><br>
+      app.<span class="f">get</span>(<span class="s">'/api/v1/veiculos'</span>, (req, res) => {<br>
+      &nbsp;&nbsp;<span class="c">// validação aqui</span><br>
+      &nbsp;&nbsp;<span class="c">// busca no banco aqui</span><br>
+      &nbsp;&nbsp;<span class="c">// formatação aqui</span><br>
+      &nbsp;&nbsp;<span class="c">// resposta aqui</span><br>
+      &nbsp;&nbsp;<span class="c">// ... 50 linhas de lógica ...</span><br>
+      });<br>
+      <br>
+      app.<span class="f">post</span>(<span class="s">'/api/v1/veiculos'</span>, (req, res) => {<br>
+      &nbsp;&nbsp;<span class="c">// mais 50 linhas...</span><br>
+      });
+    </div>
+
+    <div class="callout warn">
+      <span class="callout-icon">⚠️</span>
+      <span>Com 4 entidades × 5 rotas = 20 handlers num arquivo só. Cada handler com 30-50 linhas = um arquivo de 600-1000 linhas. Inviável de manter.</span>
+    </div>
+  </div>
+
+  <!-- MVC -->
+  <div class="section reveal">
+    <div class="section-label">Conceito — MVC</div>
+    <h2>Três responsabilidades, três lugares</h2>
+
+    <div class="mvc-diagram">
+      <div class="mvc-box model">
+        <div class="mvc-letter">M</div>
+        <div class="mvc-name">Model</div>
+        <div class="mvc-desc">Acessa o banco de dados. Contém as queries SQL. Não sabe nada sobre HTTP.</div>
+        <div class="mvc-files">
+          <div class="mvc-file">veiculoModel.js</div>
+          <div class="mvc-file">motoristaModel.js</div>
+          <div class="mvc-file">oficinaModel.js</div>
+        </div>
+      </div>
+      <div class="mvc-box ctrl">
+        <div class="mvc-letter">C</div>
+        <div class="mvc-name">Controller</div>
+        <div class="mvc-desc">Recebe req, chama o Model, monta a resposta. É o mediador.</div>
+        <div class="mvc-files">
+          <div class="mvc-file">veiculoController.js</div>
+          <div class="mvc-file">motoristaController.js</div>
+          <div class="mvc-file">oficinaController.js</div>
+        </div>
+      </div>
+      <div class="mvc-box view">
+        <div class="mvc-letter">V</div>
+        <div class="mvc-name">View</div>
+        <div class="mvc-desc">Em APIs REST, a View é o JSON retornado. No front-end separado, é o HTML/CSS/JS.</div>
+        <div class="mvc-files">
+          <div class="mvc-file">res.json(dados)</div>
+          <div class="mvc-file">← front-end consome</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- FRONT CONTROLLER -->
+  <div class="section reveal">
+    <div class="section-label">Conceito — Front Controller</div>
+    <h2>Uma porta de entrada única</h2>
+    <p>O <strong style="color:var(--cyan)">Front Controller</strong> é o padrão onde todas as requisições passam por um único ponto de entrada — o <code style="font-family:var(--mono)">app.js</code>. Ele não resolve nada diretamente: apenas distribui o trabalho para os roteadores corretos.</p>
+
+    <div class="code-block">
+      <span class="file-label">app.js — Front Controller</span>
+      <span class="k">const</span> express = <span class="f">require</span>(<span class="s">'express'</span>);<br>
+      <span class="k">const</span> app = <span class="f">express</span>();<br>
+      app.<span class="f">use</span>(express.<span class="f">json</span>());<br>
+      <br>
+      <span class="c">// delega para os roteadores — não resolve nada aqui</span><br>
+      app.<span class="f">use</span>(<span class="s">'/api/v1/veiculos'</span>,   <span class="f">require</span>(<span class="s">'./routes/veiculoRoutes'</span>));<br>
+      app.<span class="f">use</span>(<span class="s">'/api/v1/motoristas'</span>, <span class="f">require</span>(<span class="s">'./routes/motoristaRoutes'</span>));<br>
+      app.<span class="f">use</span>(<span class="s">'/api/v1/oficinas'</span>,   <span class="f">require</span>(<span class="s">'./routes/oficinaRoutes'</span>));<br>
+      <br>
+      app.<span class="f">listen</span>(<span class="n">3000</span>);
+    </div>
+  </div>
+
+  <!-- ESTRUTURA FINAL -->
+  <div class="section reveal">
+    <div class="section-label">Resultado — estrutura do projeto</div>
+    <h2>Como o projeto ficou organizado</h2>
+
+    <div class="file-tree">
+      <span class="ft-dir">gestao-frota/</span><br>
+      <span class="ft-comment">│</span><br>
+      ├── <span class="ft-hl">app.js</span>                    <span class="ft-comment">← Front Controller</span><br>
+      ├── <span class="ft-dir">routes/</span>                    <span class="ft-comment">← define as URLs</span><br>
+      │&nbsp;&nbsp;&nbsp;├── <span class="ft-file">veiculoRoutes.js</span><br>
+      │&nbsp;&nbsp;&nbsp;├── <span class="ft-file">motoristaRoutes.js</span><br>
+      │&nbsp;&nbsp;&nbsp;└── <span class="ft-file">oficinaRoutes.js</span><br>
+      ├── <span class="ft-dir">controllers/</span>               <span class="ft-comment">← processa req/res</span><br>
+      │&nbsp;&nbsp;&nbsp;├── <span class="ft-file">veiculoController.js</span><br>
+      │&nbsp;&nbsp;&nbsp;├── <span class="ft-file">motoristaController.js</span><br>
+      │&nbsp;&nbsp;&nbsp;└── <span class="ft-file">oficinaController.js</span><br>
+      ├── <span class="ft-dir">models/</span>                    <span class="ft-comment">← acessa o banco</span><br>
+      │&nbsp;&nbsp;&nbsp;├── <span class="ft-file">veiculoModel.js</span><br>
+      │&nbsp;&nbsp;&nbsp;├── <span class="ft-file">motoristaModel.js</span><br>
+      │&nbsp;&nbsp;&nbsp;└── <span class="ft-file">oficinaModel.js</span><br>
+      └── <span class="ft-dir">middlewares/</span><br>
+      &nbsp;&nbsp;&nbsp;&nbsp;└── <span class="ft-file">db.js</span>             <span class="ft-comment">← conexão com MySQL</span>
+    </div>
+  </div>
+
+  <!-- FLUXO -->
+  <div class="section reveal">
+    <div class="section-label">O fluxo de uma requisição</div>
+    <h2>O que acontece quando GET /api/v1/veiculos chega</h2>
+
+    <div class="flow-step">
+      <div class="flow-num">1</div>
+      <div class="flow-content">
+        <div class="flow-title">app.js recebe a requisição</div>
+        <div class="flow-detail">Front Controller identifica o prefixo /api/v1/veiculos e passa para veiculoRoutes</div>
+      </div>
+    </div>
+    <div class="flow-step">
+      <div class="flow-num">2</div>
+      <div class="flow-content">
+        <div class="flow-title">veiculoRoutes.js identifica a rota</div>
+        <div class="flow-detail">router.get('/') → chama veiculoController.listar</div>
+      </div>
+    </div>
+    <div class="flow-step">
+      <div class="flow-num">3</div>
+      <div class="flow-content">
+        <div class="flow-title">veiculoController.js processa</div>
+        <div class="flow-detail">Chama veiculoModel.listar(), aguarda o resultado</div>
+      </div>
+    </div>
+    <div class="flow-step">
+      <div class="flow-num">4</div>
+      <div class="flow-content">
+        <div class="flow-title">veiculoModel.js consulta o banco</div>
+        <div class="flow-detail">db.execute('SELECT * FROM VEICULO') → retorna array</div>
+      </div>
+    </div>
+    <div class="flow-step">
+      <div class="flow-num">5</div>
+      <div class="flow-content">
+        <div class="flow-title">Controller responde</div>
+        <div class="flow-detail">res.json(veiculos) → 200 OK + JSON</div>
+      </div>
+    </div>
+
+    <div class="callout ok">
+      <span class="callout-icon">✅</span>
+      <span><strong>O que aprendemos:</strong> padrão MVC, Front Controller, separação de responsabilidades, require/module.exports, Router do Express, e por que arquitetura importa quando o projeto cresce.</span>
+    </div>
+  </div>
+
 </div>
 
-<script>
-  const API = 'https://gestao-frota-api.up.railway.app/api/v1';
+<div class="unit-nav">
+  <a href="../u4/index.html">← Etapa 04 — A API toma forma</a>
+  <a href="../u6/index.html">Etapa 06 — Quem pode entrar? →</a>
+</div>
 
-  function statusBadge(s) {
-    const map = { 'ativo': 'ativo', 'manutenção': 'manutencao', 'manutencao': 'manutencao', 'inativo': 'inativo' };
-    const cls = map[s?.toLowerCase()] || 'inativo';
-    return `<span class="status ${cls}">${s}</span>`;
-  }
-
-  async function carregarVeiculos() {
-    const tbody = document.getElementById('tbody-veiculos');
-    try {
-      const res = await fetch(`${API}/veiculos`);
-      const veiculos = await res.json();
-      tbody.innerHTML = veiculos.map(v => `
-        <tr>
-          <td>${v.placa}</td>
-          <td>${v.modelo}</td>
-          <td>${v.ano}</td>
-          <td>${Number(v.km_atual).toLocaleString('pt-BR')} km</td>
-          <td>${statusBadge(v.status)}</td>
-          <td><button class="btn btn-danger btn-sm" onclick="excluirVeiculo('${v.placa}')">Excluir</button></td>
-        </tr>
-      `).join('') || '<tr><td colspan="6" class="loading">Nenhum veículo.</td></tr>';
-    } catch {
-      tbody.innerHTML = '<tr><td colspan="6" class="loading">Erro ao conectar à API.</td></tr>';
-    }
-  }
-
-  async function carregarMotoristas() {
-    const tbody = document.getElementById('tbody-motoristas');
-    try {
-      const res = await fetch(`${API}/motoristas`);
-      const lista = await res.json();
-      tbody.innerHTML = lista.map(m => `
-        <tr>
-          <td>${m.nome}</td>
-          <td>${m.cnh}</td>
-          <td>${m.categoria_cnh}</td>
-          <td>${m.validade_cnh}</td>
-          <td><button class="btn btn-danger btn-sm" onclick="excluirMotorista(${m.id})">Excluir</button></td>
-        </tr>
-      `).join('') || '<tr><td colspan="5" class="loading">Nenhum motorista.</td></tr>';
-    } catch {
-      tbody.innerHTML = '<tr><td colspan="5" class="loading">Erro ao conectar à API.</td></tr>';
-    }
-  }
-
-  async function carregarOficinas() {
-    const tbody = document.getElementById('tbody-oficinas');
-    try {
-      const res = await fetch(`${API}/oficinas`);
-      const lista = await res.json();
-      tbody.innerHTML = lista.map(o => `
-        <tr>
-          <td>${o.nome}</td>
-          <td>${o.cidade}</td>
-          <td>${o.telefone}</td>
-          <td>${o.especialidade}</td>
-          <td><button class="btn btn-danger btn-sm" onclick="excluirOficina(${o.id})">Excluir</button></td>
-        </tr>
-      `).join('') || '<tr><td colspan="5" class="loading">Nenhuma oficina.</td></tr>';
-    } catch {
-      tbody.innerHTML = '<tr><td colspan="5" class="loading">Erro ao conectar à API.</td></tr>';
-    }
-  }
-
-  async function excluirVeiculo(placa) {
-    if (!confirm(`Excluir veículo ${placa}?`)) return;
-    await fetch(`${API}/veiculos/${placa}`, { method: 'DELETE' });
-    carregarVeiculos();
-  }
-
-  async function excluirMotorista(id) {
-    if (!confirm('Excluir motorista?')) return;
-    await fetch(`${API}/motoristas/${id}`, { method: 'DELETE' });
-    carregarMotoristas();
-  }
-
-  async function excluirOficina(id) {
-    if (!confirm('Excluir oficina?')) return;
-    await fetch(`${API}/oficinas/${id}`, { method: 'DELETE' });
-    carregarOficinas();
-  }
-
-  async function salvarVeiculo() {
-    const body = {
-      placa: document.getElementById('v-placa').value,
-      modelo: document.getElementById('v-modelo').value,
-      ano: parseInt(document.getElementById('v-ano').value),
-      km_atual: parseInt(document.getElementById('v-km').value),
-      status: document.getElementById('v-status').value
-    };
-    await fetch(`${API}/veiculos`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(body)
-    });
-    fecharModal('veiculo');
-    carregarVeiculos();
-  }
-
-  function mudarTab(tab, el) {
-    document.querySelectorAll('.tab').forEach(t => t.classList.remove('ativo'));
-    document.querySelectorAll('.painel').forEach(p => p.classList.remove('ativo'));
-    el.classList.add('ativo');
-    document.getElementById(`painel-${tab}`).classList.add('ativo');
-    if (tab === 'veiculos') carregarVeiculos();
-    if (tab === 'motoristas') carregarMotoristas();
-    if (tab === 'oficinas') carregarOficinas();
-  }
-
-  function abrirModal(tipo) {
-    document.getElementById(`modal-${tipo}`).classList.add('visivel');
-  }
-
-  function fecharModal(tipo) {
-    document.getElementById(`modal-${tipo}`).classList.remove('visivel');
-  }
-
-  carregarVeiculos();
-</script>
+<footer>IFCE · DW2 · Etapa 05 de 08</footer>
 
 </body>
 </html>

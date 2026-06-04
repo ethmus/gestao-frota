@@ -4,204 +4,437 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Gestão de Frota — DW2 IFCE</title>
+  <link rel="stylesheet" href="style.css">
   <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-
-    body {
-      font-family: 'Segoe UI', Arial, sans-serif;
-      background: #f0f4f8;
-      color: #1a202c;
-    }
-
-    header {
-      background: #1E3A8A;
-      color: white;
-      padding: 2rem;
-      text-align: center;
-    }
-
-    header h1 { font-size: 2rem; margin-bottom: 0.5rem; }
-    header p { font-size: 1rem; opacity: 0.85; }
-
-    .badge {
-      display: inline-block;
-      background: #1E88E5;
-      color: white;
-      font-size: 0.75rem;
-      padding: 0.2rem 0.7rem;
-      border-radius: 999px;
-      margin-top: 0.5rem;
-    }
-
-    main {
+    .hero {
+      min-height: 80vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      padding: 4rem 2rem;
       max-width: 900px;
-      margin: 2rem auto;
-      padding: 0 1rem;
+      margin: 0 auto;
     }
 
-    .intro {
-      background: white;
-      border-left: 4px solid #1E88E5;
-      padding: 1.2rem 1.5rem;
-      border-radius: 4px;
-      margin-bottom: 2rem;
-      font-size: 0.97rem;
-      line-height: 1.7;
-    }
-
-    h2 {
-      font-size: 1.1rem;
-      color: #1E3A8A;
-      margin-bottom: 1rem;
+    .hero-eyebrow {
+      font-family: var(--mono);
+      font-size: 0.7rem;
+      letter-spacing: 0.25em;
       text-transform: uppercase;
-      letter-spacing: 0.05em;
+      color: var(--gold);
+      margin-bottom: 1.5rem;
+      display: flex;
+      align-items: center;
+      gap: 1rem;
     }
 
-    .grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-      gap: 1.2rem;
-      margin-bottom: 2rem;
+    .hero-eyebrow::before {
+      content: '';
+      display: inline-block;
+      width: 40px;
+      height: 1px;
+      background: var(--gold);
     }
 
-    .card {
-      background: white;
-      border-radius: 8px;
-      padding: 1.4rem;
-      box-shadow: 0 1px 4px rgba(0,0,0,0.08);
-      border-top: 4px solid #1E88E5;
-      text-decoration: none;
-      color: inherit;
-      display: block;
-      transition: transform 0.15s, box-shadow 0.15s;
+    .hero h1 {
+      font-family: var(--serif);
+      font-size: clamp(2.5rem, 7vw, 5rem);
+      font-weight: 300;
+      color: var(--text-bright);
+      line-height: 1.1;
+      margin-bottom: 1.5rem;
     }
 
-    .card:hover {
-      transform: translateY(-3px);
-      box-shadow: 0 4px 12px rgba(0,0,0,0.12);
+    .hero h1 em {
+      font-style: italic;
+      color: var(--gold-light);
     }
 
-    .card .unidade {
-      font-size: 0.75rem;
-      font-weight: 700;
-      color: #1E88E5;
-      text-transform: uppercase;
-      letter-spacing: 0.08em;
-      margin-bottom: 0.4rem;
+    .hero h1 .accent {
+      color: var(--cyan);
     }
 
-    .card h3 {
+    .hero-desc {
       font-size: 1rem;
-      margin-bottom: 0.5rem;
-      color: #1E3A8A;
+      color: var(--text-dim);
+      max-width: 540px;
+      line-height: 1.75;
+      margin-bottom: 2rem;
     }
 
-    .card p {
-      font-size: 0.88rem;
-      color: #4a5568;
+    .hero-meta {
+      font-family: var(--mono);
+      font-size: 0.7rem;
+      letter-spacing: 0.08em;
+      color: var(--text-dim);
+      display: flex;
+      gap: 2rem;
+      flex-wrap: wrap;
+    }
+
+    .hero-meta span { display: flex; align-items: center; gap: 0.4rem; }
+    .hero-meta .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--gold); }
+
+    /* JORNADA */
+    .jornada {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 0 2rem 6rem;
+    }
+
+    .jornada-title {
+      font-family: var(--mono);
+      font-size: 0.65rem;
+      letter-spacing: 0.25em;
+      text-transform: uppercase;
+      color: var(--text-dim);
+      margin-bottom: 3rem;
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .jornada-title::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: rgba(255,255,255,0.06);
+    }
+
+    .etapas {
+      display: grid;
+      gap: 1px;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.04);
+      border-radius: 10px;
+      overflow: hidden;
+    }
+
+    .etapa {
+      background: var(--ink);
+      padding: 1.8rem 2rem;
+      display: grid;
+      grid-template-columns: 60px 1fr auto;
+      align-items: center;
+      gap: 1.5rem;
+      text-decoration: none;
+      transition: background 0.2s;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .etapa::before {
+      content: '';
+      position: absolute;
+      left: 0; top: 0; bottom: 0;
+      width: 3px;
+      background: var(--accent, transparent);
+      transition: opacity 0.2s;
+      opacity: 0;
+    }
+
+    .etapa:hover { background: rgba(255,255,255,0.025); }
+    .etapa:hover::before { opacity: 1; }
+
+    .etapa-num {
+      font-family: var(--serif);
+      font-size: 2.5rem;
+      font-weight: 300;
+      color: rgba(255,255,255,0.08);
+      line-height: 1;
+      text-align: right;
+      transition: color 0.2s;
+    }
+
+    .etapa:hover .etapa-num { color: var(--accent, rgba(255,255,255,0.15)); }
+
+    .etapa-info {}
+
+    .etapa-titulo {
+      font-family: var(--serif);
+      font-size: 1.1rem;
+      font-weight: 300;
+      color: var(--text-bright);
+      margin-bottom: 0.3rem;
+    }
+
+    .etapa-desc {
+      font-size: 0.82rem;
+      color: var(--text-dim);
       line-height: 1.5;
     }
 
-    .card .tags {
-      margin-top: 0.8rem;
+    .etapa-tags {
       display: flex;
-      flex-wrap: wrap;
       gap: 0.4rem;
+      flex-wrap: wrap;
+      margin-top: 0.6rem;
     }
 
-    .tag {
-      background: #EBF4FF;
-      color: #1E88E5;
-      font-size: 0.72rem;
-      padding: 0.2rem 0.5rem;
-      border-radius: 4px;
+    .etapa-arrow {
+      font-size: 1rem;
+      color: var(--text-dim);
+      transition: transform 0.2s, color 0.2s;
+      flex-shrink: 0;
     }
 
-    footer {
+    .etapa:hover .etapa-arrow {
+      transform: translateX(4px);
+      color: var(--accent, var(--gold));
+    }
+
+    /* cores por etapa */
+    .e1 { --accent: #E05252; }
+    .e2 { --accent: #C9A84C; }
+    .e3 { --accent: #52C97A; }
+    .e4 { --accent: #4ECDC4; }
+    .e5 { --accent: #7B8CDE; }
+    .e6 { --accent: #DE7B8C; }
+    .e7 { --accent: #8CDE7B; }
+    .e8 { --accent: #DEB87B; }
+
+    /* STACK COMPLETA */
+    .stack-section {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 3rem 2rem 6rem;
+    }
+
+    .stack-line {
+      display: flex;
+      align-items: center;
+      gap: 0;
+      padding: 2rem 0;
+      overflow-x: auto;
+    }
+
+    .stack-item {
       text-align: center;
-      padding: 2rem;
-      font-size: 0.82rem;
-      color: #718096;
+      flex-shrink: 0;
+      padding: 0 1rem;
+    }
+
+    .stack-icon {
+      width: 48px;
+      height: 48px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.3rem;
+      margin: 0 auto 0.5rem;
+    }
+
+    .stack-name {
+      font-family: var(--mono);
+      font-size: 0.65rem;
+      letter-spacing: 0.08em;
+      color: var(--text-dim);
+    }
+
+    .stack-arrow {
+      color: var(--text-dim);
+      font-size: 0.8rem;
+      padding: 0 0.5rem;
+      flex-shrink: 0;
     }
   </style>
 </head>
 <body>
 
-<header>
-  <h1>🚛 Sistema de Gestão de Frota</h1>
-  <p>Projeto demonstrativo da disciplina Desenvolvimento Web 2</p>
-  <span class="badge">IFCE — Informática para Internet (EAD)</span>
-</header>
+<nav class="topbar">
+  <a href="index.html" class="topbar-brand">Gestão de Frota</a>
+  <span class="topbar-sep">/</span>
+  <span class="topbar-title">Projeto Demonstrativo</span>
+  <span class="topbar-tag">DW2 · IFCE</span>
+</nav>
 
-<main>
-  <div class="intro">
-    Este projeto foi construído unidade por unidade, seguindo exatamente o conteúdo da disciplina DW2.
-    Se você acompanhou cada aula e realizou as atividades, você é capaz de construir este sistema do zero.
-    Explore cada unidade abaixo para ver o resultado de cada etapa.
+<section class="hero reveal">
+  <div class="hero-eyebrow">Desenvolvimento Web II · Informática para Internet EAD</div>
+  <h1>
+    Um sistema<br>
+    construído <em>camada</em><br>
+    por <span class="accent">camada</span>
+  </h1>
+  <p class="hero-desc">
+    Este é o Sistema de Gestão de Frota — construído ao longo das 8 unidades da disciplina DW2.
+    Cada etapa abaixo representa uma camada técnica adicionada ao sistema.
+    Se você acompanhou a disciplina, você é capaz de construir tudo isso.
+  </p>
+  <div class="hero-meta">
+    <span><span class="dot"></span> 8 etapas de construção</span>
+    <span><span class="dot"></span> HTML → CSS → JS → Node → Express → MySQL</span>
+    <span><span class="dot"></span> Front-end + Back-end + Banco de dados</span>
   </div>
+</section>
 
-  <h2>Unidades do Projeto</h2>
+<section class="jornada">
+  <div class="jornada-title">A jornada de construção</div>
 
-  <div class="grid">
+  <div class="etapas">
 
-    <a class="card" href="u1/index.html">
-      <div class="unidade">Unidade 1</div>
-      <h3>Interface Estática</h3>
-      <p>Tela de listagem de veículos construída com HTML e CSS puro. Sem lógica, sem dados reais — só estrutura e visual.</p>
-      <div class="tags">
-        <span class="tag">HTML</span>
-        <span class="tag">CSS</span>
+    <a href="u1/index.html" class="etapa e1 reveal reveal-1">
+      <div class="etapa-num">01</div>
+      <div class="etapa-info">
+        <div class="etapa-titulo">A interface nasce</div>
+        <div class="etapa-desc">HTML semântico, CSS visual, JavaScript e manipulação do DOM. A tela de veículos ganha vida — estrutura, estilo e comportamento.</div>
+        <div class="etapa-tags">
+          <span class="concept-tag html">HTML</span>
+          <span class="concept-tag css">CSS</span>
+          <span class="concept-tag js">JavaScript</span>
+          <span class="concept-tag js">DOM</span>
+        </div>
       </div>
+      <div class="etapa-arrow">→</div>
     </a>
 
-    <a class="card" href="u2/index.html">
-      <div class="unidade">Unidade 2</div>
-      <h3>Consumindo uma API</h3>
-      <p>A mesma tela agora busca dados reais com Fetch API. Os veículos vêm do servidor — a interface apenas exibe.</p>
-      <div class="tags">
-        <span class="tag">JavaScript</span>
-        <span class="tag">Fetch API</span>
-        <span class="tag">JSON</span>
+    <a href="u2/index.html" class="etapa e2 reveal reveal-2">
+      <div class="etapa-num">02</div>
+      <div class="etapa-info">
+        <div class="etapa-titulo">A interface conversa</div>
+        <div class="etapa-desc">AJAX e Fetch API. A tela para de ter dados fixos e começa a buscar informações de um servidor, atualizando sem recarregar a página.</div>
+        <div class="etapa-tags">
+          <span class="concept-tag js">Fetch API</span>
+          <span class="concept-tag js">AJAX</span>
+          <span class="concept-tag js">Async/Await</span>
+          <span class="concept-tag js">JSON</span>
+        </div>
       </div>
+      <div class="etapa-arrow">→</div>
     </a>
 
-    <a class="card" href="u3/index.html">
-      <div class="unidade">Unidade 3</div>
-      <h3>Servidor Node.js Puro</h3>
-      <p>Como o servidor funciona por dentro — sem framework, respondendo requisições HTTP manualmente.</p>
-      <div class="tags">
-        <span class="tag">Node.js</span>
-        <span class="tag">HTTP</span>
+    <a href="u3/index.html" class="etapa e3 reveal reveal-3">
+      <div class="etapa-num">03</div>
+      <div class="etapa-info">
+        <div class="etapa-titulo">O servidor responde</div>
+        <div class="etapa-desc">Node.js puro. Criamos o servidor do zero — sem framework — para entender o que acontece por baixo de cada requisição HTTP.</div>
+        <div class="etapa-tags">
+          <span class="concept-tag node">Node.js</span>
+          <span class="concept-tag node">HTTP</span>
+          <span class="concept-tag node">req / res</span>
+        </div>
       </div>
+      <div class="etapa-arrow">→</div>
     </a>
 
-    <a class="card" href="u4/index.html">
-      <div class="unidade">Unidade 4</div>
-      <h3>API REST com Express</h3>
-      <p>O servidor refatorado com Express. Rotas limpas, verbos HTTP corretos, status codes adequados.</p>
-      <div class="tags">
-        <span class="tag">Express</span>
-        <span class="tag">REST</span>
-        <span class="tag">CRUD</span>
+    <a href="u4/index.html" class="etapa e4 reveal reveal-4">
+      <div class="etapa-num">04</div>
+      <div class="etapa-info">
+        <div class="etapa-titulo">A API toma forma</div>
+        <div class="etapa-desc">REST com Express. Rotas declarativas, verbos HTTP corretos, status codes semânticos. O servidor vira uma API profissional.</div>
+        <div class="etapa-tags">
+          <span class="concept-tag node">Express</span>
+          <span class="concept-tag node">REST</span>
+          <span class="concept-tag node">GET / POST / PUT / DELETE</span>
+        </div>
       </div>
+      <div class="etapa-arrow">→</div>
     </a>
 
-    <a class="card" href="u5/index.html">
-      <div class="unidade">Unidade 5</div>
-      <h3>Integração com Banco de Dados</h3>
-      <p>Sistema completo: front-end → Fetch → API REST → mysql2 → frota_db. Dados reais, persistência real.</p>
-      <div class="tags">
-        <span class="tag">MySQL</span>
-        <span class="tag">mysql2</span>
-        <span class="tag">MVC</span>
+    <a href="u5/index.html" class="etapa e5 reveal reveal-5">
+      <div class="etapa-num">05</div>
+      <div class="etapa-info">
+        <div class="etapa-titulo">O código se organiza</div>
+        <div class="etapa-desc">Front Controller e MVC. O projeto cresce sem virar caos — cada arquivo tem uma responsabilidade clara e o código se torna legível.</div>
+        <div class="etapa-tags">
+          <span class="concept-tag node">MVC</span>
+          <span class="concept-tag node">Front Controller</span>
+          <span class="concept-tag node">Arquitetura</span>
+        </div>
       </div>
+      <div class="etapa-arrow">→</div>
+    </a>
+
+    <a href="u6/index.html" class="etapa e6 reveal">
+      <div class="etapa-num">06</div>
+      <div class="etapa-info">
+        <div class="etapa-titulo">Quem pode entrar?</div>
+        <div class="etapa-desc">Sessões, autenticação e controle de acesso. O sistema aprende a reconhecer quem é quem e proteger o que precisa ser protegido.</div>
+        <div class="etapa-tags">
+          <span class="concept-tag sec">Sessão</span>
+          <span class="concept-tag sec">Autenticação</span>
+          <span class="concept-tag sec">JWT</span>
+          <span class="concept-tag sec">Autorização</span>
+        </div>
+      </div>
+      <div class="etapa-arrow">→</div>
+    </a>
+
+    <a href="u7/index.html" class="etapa e7 reveal">
+      <div class="etapa-num">07</div>
+      <div class="etapa-info">
+        <div class="etapa-titulo">Os dados persistem</div>
+        <div class="etapa-desc">Integração com MySQL via mysql2. Os veículos, motoristas e oficinas deixam de existir só na memória e passam a viver no banco de dados.</div>
+        <div class="etapa-tags">
+          <span class="concept-tag db">MySQL</span>
+          <span class="concept-tag db">mysql2</span>
+          <span class="concept-tag db">frota_db</span>
+          <span class="concept-tag db">CRUD real</span>
+        </div>
+      </div>
+      <div class="etapa-arrow">→</div>
+    </a>
+
+    <a href="u8/index.html" class="etapa e8 reveal">
+      <div class="etapa-num">08</div>
+      <div class="etapa-info">
+        <div class="etapa-titulo">O sistema completo</div>
+        <div class="etapa-desc">Todas as camadas unidas. O projeto final — uma aplicação web real, com front-end, API REST, autenticação e banco de dados funcionando.</div>
+        <div class="etapa-tags">
+          <span class="concept-tag html">Front-end</span>
+          <span class="concept-tag node">Back-end</span>
+          <span class="concept-tag db">Banco</span>
+          <span class="concept-tag sec">Segurança</span>
+        </div>
+      </div>
+      <div class="etapa-arrow">→</div>
     </a>
 
   </div>
-</main>
+</section>
+
+<section class="stack-section reveal">
+  <div class="jornada-title">A stack completa</div>
+  <div class="stack-line">
+    <div class="stack-item">
+      <div class="stack-icon" style="background:rgba(224,82,82,0.12)">🌐</div>
+      <div class="stack-name">HTML/CSS/JS</div>
+    </div>
+    <div class="stack-arrow">→</div>
+    <div class="stack-item">
+      <div class="stack-icon" style="background:rgba(201,168,76,0.12)">⚡</div>
+      <div class="stack-name">Fetch API</div>
+    </div>
+    <div class="stack-arrow">→</div>
+    <div class="stack-item">
+      <div class="stack-icon" style="background:rgba(82,201,122,0.12)">⬡</div>
+      <div class="stack-name">Node.js</div>
+    </div>
+    <div class="stack-arrow">→</div>
+    <div class="stack-item">
+      <div class="stack-icon" style="background:rgba(78,205,196,0.12)">🚂</div>
+      <div class="stack-name">Express</div>
+    </div>
+    <div class="stack-arrow">→</div>
+    <div class="stack-item">
+      <div class="stack-icon" style="background:rgba(123,140,222,0.12)">📐</div>
+      <div class="stack-name">MVC</div>
+    </div>
+    <div class="stack-arrow">→</div>
+    <div class="stack-item">
+      <div class="stack-icon" style="background:rgba(222,123,140,0.12)">🔐</div>
+      <div class="stack-name">Auth/Sessão</div>
+    </div>
+    <div class="stack-arrow">→</div>
+    <div class="stack-item">
+      <div class="stack-icon" style="background:rgba(140,222,123,0.12)">🗄️</div>
+      <div class="stack-name">MySQL</div>
+    </div>
+  </div>
+</section>
 
 <footer>
-  IFCE · Informática para Internet EAD · Desenvolvimento Web 2
+  IFCE · Informática para Internet EAD · Desenvolvimento Web II · <span style="color:var(--gold)">Sistema de Gestão de Frota</span>
 </footer>
 
 </body>

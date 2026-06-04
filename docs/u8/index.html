@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Etapa 8 — O sistema completo | Gestão de Frota DW2</title>
+  <link rel="stylesheet" href="../style.css">
+  <style>
+    .celebration {
+      text-align: center;
+      padding: 3rem 2rem;
+      border-bottom: 1px solid rgba(255,255,255,0.04);
+    }
+    .celebration .big-number {
+      font-family: var(--serif);
+      font-size: 6rem;
+      font-weight: 300;
+      line-height: 1;
+      background: linear-gradient(135deg, var(--gold), var(--cyan));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .celebration p {
+      color: var(--text-dim);
+      font-size: 0.95rem;
+      max-width: 480px;
+      margin: 0.8rem auto 0;
+      line-height: 1.7;
+    }
+
+    .layer-stack {
+      display: flex;
+      flex-direction: column;
+      gap: 0.4rem;
+      margin: 1.5rem 0;
+    }
+    .layer {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      padding: 0.9rem 1.2rem;
+      border-radius: var(--radius);
+      border: 1px solid;
+      transition: transform 0.2s;
+    }
+    .layer:hover { transform: translateX(4px); }
+    .layer-num {
+      font-family: var(--mono);
+      font-size: 0.62rem;
+      color: inherit;
+      opacity: 0.6;
+      flex-shrink: 0;
+      width: 20px;
+    }
+    .layer-name {
+      font-family: var(--mono);
+      font-size: 0.75rem;
+      flex: 1;
+    }
+    .layer-tech {
+      font-family: var(--mono);
+      font-size: 0.65rem;
+      opacity: 0.7;
+    }
+    .l1 { background: rgba(224,82,82,0.06);   border-color: rgba(224,82,82,0.2);   color: #E05252; }
+    .l2 { background: rgba(201,168,76,0.06);  border-color: rgba(201,168,76,0.2);  color: #C9A84C; }
+    .l3 { background: rgba(82,201,122,0.06);  border-color: rgba(82,201,122,0.2);  color: #52C97A; }
+    .l4 { background: rgba(78,205,196,0.06);  border-color: rgba(78,205,196,0.2);  color: #4ECDC4; }
+    .l5 { background: rgba(123,140,222,0.06); border-color: rgba(123,140,222,0.2); color: #7B8CDE; }
+    .l6 { background: rgba(222,123,140,0.06); border-color: rgba(222,123,140,0.2); color: #DE7B8C; }
+    .l7 { background: rgba(140,222,123,0.06); border-color: rgba(140,222,123,0.2); color: #8CDE7B; }
+
+    .full-system {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+      margin: 1.5rem 0;
+    }
+    @media(max-width:600px) { .full-system { grid-template-columns: 1fr; } }
+
+    .sys-panel {
+      border-radius: var(--radius);
+      overflow: hidden;
+    }
+
+    .tabs-u8 { display: flex; gap: 0.3rem; margin-bottom: 1rem; flex-wrap: wrap; }
+    .tab-u8 {
+      font-family: var(--mono);
+      font-size: 0.65rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      padding: 0.4rem 0.8rem;
+      border-radius: 4px;
+      border: 1px solid rgba(255,255,255,0.1);
+      background: transparent;
+      color: var(--text-dim);
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .tab-u8.active {
+      background: rgba(201,168,76,0.1);
+      border-color: var(--gold);
+      color: var(--gold);
+    }
+    .panel-u8 { display: none; }
+    .panel-u8.active { display: block; }
+
+    .conquista-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+      gap: 0.8rem;
+      margin: 1.5rem 0;
+    }
+    .conquista {
+      background: rgba(15,31,61,0.6);
+      border: 1px solid rgba(255,255,255,0.06);
+      border-radius: var(--radius);
+      padding: 1rem;
+      display: flex;
+      gap: 0.7rem;
+      align-items: flex-start;
+    }
+    .conquista-icon { font-size: 1.2rem; flex-shrink: 0; }
+    .conquista-text { font-size: 0.82rem; color: var(--text-dim); line-height: 1.5; }
+    .conquista-text strong { color: var(--text-bright); display: block; margin-bottom: 0.2rem; }
+  </style>
+</head>
+<body>
+
+<nav class="topbar">
+  <a href="../index.html" class="topbar-brand">← Gestão de Frota</a>
+  <span class="topbar-sep">/</span>
+  <span class="topbar-title">Etapa 08</span>
+  <span class="topbar-tag">Projeto Final · Sistema Completo</span>
+</nav>
+
+<section class="unit-hero">
+  <div class="unit-number reveal">Etapa 08 de 08</div>
+  <h1 class="reveal reveal-1">O sistema <em>completo</em></h1>
+  <p class="lead reveal reveal-2">
+    Esta é a última etapa — e a mais importante. Não porque é difícil,
+    mas porque é onde você percebe que <em>todas as peças se encaixam</em>.
+    O front-end que você construiu na etapa 1 consome a API que você construiu nas etapas 3 e 4,
+    organizada como você aprendeu na 5, protegida como na 6, e persistindo no banco da 7.
+  </p>
+  <div class="concepts reveal reveal-3">
+    <span class="concept-tag html">Front-end</span>
+    <span class="concept-tag node">Back-end</span>
+    <span class="concept-tag db">Banco de dados</span>
+    <span class="concept-tag sec">Segurança</span>
+    <span class="concept-tag node">Deploy</span>
+  </div>
+</section>
+
+<div class="celebration reveal">
+  <div class="big-number">8</div>
+  <p>Etapas. Sete camadas de tecnologia empilhadas. Uma aplicação web completa — do HTML até o banco de dados — construída por você, do zero.</p>
+</div>
+
+<div class="content">
+
+  <!-- AS 7 CAMADAS -->
+  <div class="section reveal">
+    <div class="section-label">O que foi construído</div>
+    <h2>Sete camadas, um sistema</h2>
+
+    <div class="layer-stack">
+      <div class="layer l1">
+        <span class="layer-num">01</span>
+        <span class="layer-name">Interface — HTML + CSS + JavaScript + DOM</span>
+        <span class="layer-tech">Front-end</span>
+      </div>
+      <div class="layer l2">
+        <span class="layer-num">02</span>
+        <span class="layer-name">Comunicação — Fetch API + AJAX + Async/Await</span>
+        <span class="layer-tech">Client ↔ Server</span>
+      </div>
+      <div class="layer l3">
+        <span class="layer-num">03</span>
+        <span class="layer-name">Servidor — Node.js + módulo HTTP</span>
+        <span class="layer-tech">Back-end</span>
+      </div>
+      <div class="layer l4">
+        <span class="layer-num">04</span>
+        <span class="layer-name">API REST — Express + verbos HTTP + status codes</span>
+        <span class="layer-tech">API Layer</span>
+      </div>
+      <div class="layer l5">
+        <span class="layer-num">05</span>
+        <span class="layer-name">Arquitetura — MVC + Front Controller</span>
+        <span class="layer-tech">Organização</span>
+      </div>
+      <div class="layer l6">
+        <span class="layer-num">06</span>
+        <span class="layer-name">Segurança — Sessão + JWT + Autenticação + bcrypt</span>
+        <span class="layer-tech">Auth</span>
+      </div>
+      <div class="layer l7">
+        <span class="layer-num">07</span>
+        <span class="layer-name">Persistência — MySQL + mysql2 + frota_db</span>
+        <span class="layer-tech">Banco de dados</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- SISTEMA REAL -->
+  <div class="section reveal">
+    <div class="section-label">O sistema funcionando</div>
+    <h2>Todas as entidades em um único lugar</h2>
+
+    <div class="tabs-u8">
+      <button class="tab-u8 active" onclick="mudarTab('veiculos', this)">🚛 Veículos</button>
+      <button class="tab-u8" onclick="mudarTab('motoristas', this)">👤 Motoristas</button>
+      <button class="tab-u8" onclick="mudarTab('oficinas', this)">🔧 Oficinas</button>
+    </div>
+
+    <div class="panel-u8 active" id="p-veiculos">
+      <table class="data-table">
+        <thead><tr><th>Placa</th><th>Modelo</th><th>Ano</th><th>Km</th><th>Status</th></tr></thead>
+        <tbody id="tb-veiculos"><tr><td colspan="5" class="loading">Carregando</td></tr></tbody>
+      </table>
+    </div>
+    <div class="panel-u8" id="p-motoristas">
+      <table class="data-table">
+        <thead><tr><th>Nome</th><th>CNH</th><th>Categoria</th><th>Validade</th></tr></thead>
+        <tbody id="tb-motoristas"><tr><td colspan="4" class="loading">Carregando</td></tr></tbody>
+      </table>
+    </div>
+    <div class="panel-u8" id="p-oficinas">
+      <table class="data-table">
+        <thead><tr><th>Nome</th><th>Cidade</th><th>Telefone</th><th>Especialidade</th></tr></thead>
+        <tbody id="tb-oficinas"><tr><td colspan="4" class="loading">Carregando</td></tr></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- FLUXO COMPLETO -->
+  <div class="section reveal">
+    <div class="section-label">O fluxo completo de uma requisição</div>
+    <h2>Da tela ao banco — e de volta</h2>
+
+    <div class="code-block">
+      <span class="file-label">diagrama completo</span>
+      <span class="c">// 1. USUÁRIO clica em "Listar Veículos" no navegador</span><br>
+      <span class="c">//    ↓ (etapa 1 — evento do DOM)</span><br>
+      <br>
+      <span class="c">// 2. fetch('/api/v1/veiculos') com token JWT no header</span><br>
+      <span class="c">//    ↓ (etapa 2 — Fetch API)</span><br>
+      <br>
+      <span class="c">// 3. app.js recebe a requisição (Front Controller)</span><br>
+      <span class="c">//    ↓ (etapa 5 — MVC)</span><br>
+      <br>
+      <span class="c">// 4. middleware verificaToken valida o JWT</span><br>
+      <span class="c">//    ↓ (etapa 6 — Auth) — 401 se inválido</span><br>
+      <br>
+      <span class="c">// 5. veiculoController.listar() é chamado</span><br>
+      <span class="c">//    ↓ (etapa 4 — Express Routes)</span><br>
+      <br>
+      <span class="c">// 6. veiculoModel.listar() executa SELECT no MySQL</span><br>
+      <span class="c">//    ↓ (etapa 7 — mysql2)</span><br>
+      <br>
+      <span class="c">// 7. res.json(veiculos) → 200 OK + array JSON</span><br>
+      <span class="c">//    ↓ (etapa 4 — REST/Express)</span><br>
+      <br>
+      <span class="c">// 8. DOM atualizado com os dados recebidos</span><br>
+      <span class="c">//    ↓ (etapa 1 — JavaScript/DOM)</span>
+    </div>
+  </div>
+
+  <!-- O QUE VOCÊ CONQUISTOU -->
+  <div class="section reveal">
+    <div class="section-label">O que você conquistou</div>
+    <h2>Competências de um desenvolvedor full-stack</h2>
+
+    <div class="conquista-grid">
+      <div class="conquista">
+        <span class="conquista-icon">🌐</span>
+        <div class="conquista-text"><strong>Front-end</strong>HTML semântico, CSS responsivo, JavaScript, manipulação de DOM e eventos do usuário.</div>
+      </div>
+      <div class="conquista">
+        <span class="conquista-icon">⚡</span>
+        <div class="conquista-text"><strong>Comunicação assíncrona</strong>Fetch API, async/await, tratamento de erros de rede, consumo de APIs REST.</div>
+      </div>
+      <div class="conquista">
+        <span class="conquista-icon">⬡</span>
+        <div class="conquista-text"><strong>Back-end com Node.js</strong>Servidor HTTP nativo, Express, roteamento, middlewares, req/res.</div>
+      </div>
+      <div class="conquista">
+        <span class="conquista-icon">📐</span>
+        <div class="conquista-text"><strong>Arquitetura MVC</strong>Separação de responsabilidades, Front Controller, código modular e escalável.</div>
+      </div>
+      <div class="conquista">
+        <span class="conquista-icon">🔐</span>
+        <div class="conquista-text"><strong>Segurança</strong>Autenticação com JWT, hashing de senhas com bcrypt, autorização por perfil.</div>
+      </div>
+      <div class="conquista">
+        <span class="conquista-icon">🗄️</span>
+        <div class="conquista-text"><strong>Banco de dados</strong>MySQL, mysql2/promise, queries parametrizadas, pool de conexões, CRUD real.</div>
+      </div>
+      <div class="conquista">
+        <span class="conquista-icon">🚀</span>
+        <div class="conquista-text"><strong>Deploy</strong>GitHub Pages (front-end estático) e Railway (Node.js + MySQL) — aplicação no ar.</div>
+      </div>
+      <div class="conquista">
+        <span class="conquista-icon">🔄</span>
+        <div class="conquista-text"><strong>API REST</strong>Verbos HTTP semânticos, status codes corretos, endpoints versionados, CORS.</div>
+      </div>
+    </div>
+
+    <div class="callout ok" style="margin-top:1.5rem">
+      <span class="callout-icon">✅</span>
+      <span>
+        <strong>Você construiu uma aplicação web completa.</strong>
+        Ela tem interface, se comunica de forma assíncrona, tem um servidor organizado, protege dados sensíveis e persiste informações num banco de dados real.
+        Isso é Desenvolvimento Web — do primeiro HTML até o último SELECT.
+      </span>
+    </div>
+  </div>
+
+  <!-- LINK FINAL -->
+  <div class="section reveal" style="text-align:center;padding:2rem 0">
+    <div style="font-family:var(--mono);font-size:0.65rem;letter-spacing:0.2em;text-transform:uppercase;color:var(--text-dim);margin-bottom:1rem">Repositório do projeto</div>
+    <a href="https://github.com/ethmus/gestao-frota" target="_blank" style="font-family:var(--mono);font-size:0.85rem;color:var(--cyan);text-decoration:none;display:inline-flex;align-items:center;gap:0.5rem;padding:0.7rem 1.4rem;border:1px solid rgba(78,205,196,0.3);border-radius:var(--radius);transition:all 0.2s">
+      ⌥ github.com/ethmus/gestao-frota
+    </a>
+    <div style="margin-top:1rem">
+      <a href="../index.html" style="font-family:var(--mono);font-size:0.72rem;color:var(--text-dim);text-decoration:none">← Voltar ao início da jornada</a>
+    </div>
+  </div>
+
+</div>
+
+<div class="unit-nav">
+  <a href="../u7/index.html">← Etapa 07 — Os dados persistem</a>
+  <a href="../index.html">↑ Início da jornada</a>
+</div>
+
+<footer>IFCE · DW2 · Etapa 08 de 08 · Fim da jornada</footer>
+
+<script>
+const API = 'https://gestao-frota-api.up.railway.app/api/v1';
+
+function badge(s) {
+  const l = s === 'manutencao' ? 'Manutenção' : s.charAt(0).toUpperCase() + s.slice(1);
+  return `<span class="badge ${s}">${l}</span>`;
+}
+
+async function carregar(entidade, tbId, colunas) {
+  const tb = document.getElementById(tbId);
+  try {
+    const res = await fetch(`${API}/${entidade}`);
+    const lista = await res.json();
+    tb.innerHTML = lista.map(item => `<tr>${colunas.map(c => {
+      const val = item[c];
+      if (c === 'status') return `<td>${badge(val)}</td>`;
+      if (c === 'km_atual') return `<td style="font-family:var(--mono);font-size:0.78rem">${Number(val).toLocaleString('pt-BR')} km</td>`;
+      if (c === 'placa' || c === 'cnh') return `<td style="font-family:var(--mono);font-size:0.78rem">${val}</td>`;
+      return `<td>${val || '—'}</td>`;
+    }).join('')}</tr>`).join('') || `<tr><td colspan="${colunas.length}" class="loading">Nenhum registro</td></tr>`;
+  } catch {
+    tb.innerHTML = `<tr><td colspan="${colunas.length}" class="loading">API offline</td></tr>`;
+  }
+}
+
+function mudarTab(nome, btn) {
+  document.querySelectorAll('.tab-u8').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.panel-u8').forEach(p => p.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('p-' + nome).classList.add('active');
+  if (nome === 'veiculos')   carregar('veiculos',   'tb-veiculos',   ['placa','modelo','ano','km_atual','status']);
+  if (nome === 'motoristas') carregar('motoristas', 'tb-motoristas', ['nome','cnh','categoria_cnh','validade_cnh']);
+  if (nome === 'oficinas')   carregar('oficinas',   'tb-oficinas',   ['nome','cidade','telefone','especialidade']);
+}
+
+// Carregar inicial
+carregar('veiculos', 'tb-veiculos', ['placa','modelo','ano','km_atual','status']);
+</script>
+</body>
+</html>

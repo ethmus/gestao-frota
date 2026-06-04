@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Etapa 7 — Os dados persistem | Gestão de Frota DW2</title>
+  <link rel="stylesheet" href="../style.css">
+  <style>
+    .schema-table {
+      background: rgba(11,22,40,0.8);
+      border: 1px solid rgba(140,222,123,0.2);
+      border-radius: var(--radius);
+      overflow: hidden;
+      margin: 0.8rem 0;
+      font-family: var(--mono);
+      font-size: 0.75rem;
+    }
+    .schema-header {
+      background: rgba(140,222,123,0.1);
+      border-bottom: 1px solid rgba(140,222,123,0.2);
+      padding: 0.5rem 1rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      color: #8CDE7B;
+      font-size: 0.7rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+    }
+    .schema-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      padding: 0.4rem 1rem;
+      border-bottom: 1px solid rgba(255,255,255,0.03);
+      color: var(--text-dim);
+      transition: background 0.15s;
+    }
+    .schema-row:last-child { border: none; }
+    .schema-row:hover { background: rgba(255,255,255,0.02); }
+    .schema-row .col-name { color: var(--text-bright); }
+    .schema-row .col-type { color: var(--cyan); }
+    .schema-row .col-constraint { color: var(--gold); }
+
+    .er-diagram {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      gap: 0.8rem;
+      margin: 1.5rem 0;
+    }
+    .er-box {
+      background: rgba(15,31,61,0.6);
+      border: 1px solid rgba(140,222,123,0.2);
+      border-radius: var(--radius);
+      padding: 1rem;
+    }
+    .er-box-name {
+      font-family: var(--mono);
+      font-size: 0.65rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: #8CDE7B;
+      margin-bottom: 0.6rem;
+      padding-bottom: 0.4rem;
+      border-bottom: 1px solid rgba(140,222,123,0.15);
+    }
+    .er-field {
+      font-family: var(--mono);
+      font-size: 0.7rem;
+      color: var(--text-dim);
+      padding: 0.15rem 0;
+      display: flex;
+      gap: 0.5rem;
+    }
+    .er-field .pk { color: var(--gold); font-size: 0.6rem; }
+    .er-field .fk { color: var(--cyan); font-size: 0.6rem; }
+
+    .query-demo {
+      margin: 1rem 0;
+    }
+    .query-tab {
+      display: flex;
+      gap: 0;
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+      margin-bottom: 0;
+    }
+    .q-tab {
+      font-family: var(--mono);
+      font-size: 0.65rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      padding: 0.5rem 1rem;
+      cursor: pointer;
+      color: var(--text-dim);
+      border-bottom: 2px solid transparent;
+      transition: all 0.15s;
+      background: none;
+      border-top: none;
+      border-left: none;
+      border-right: none;
+    }
+    .q-tab.active { color: #8CDE7B; border-bottom-color: #8CDE7B; }
+    .q-panel { display: none; }
+    .q-panel.active { display: block; }
+  </style>
+</head>
+<body>
+
+<nav class="topbar">
+  <a href="../index.html" class="topbar-brand">← Gestão de Frota</a>
+  <span class="topbar-sep">/</span>
+  <span class="topbar-title">Etapa 07</span>
+  <span class="topbar-tag">MySQL · mysql2 · CRUD real</span>
+</nav>
+
+<section class="unit-hero">
+  <div class="unit-number reveal">Etapa 07 de 08</div>
+  <h1 class="reveal reveal-1">Os dados <em>persistem</em></h1>
+  <p class="lead reveal reveal-2">
+    Até aqui, os dados viviam na memória do servidor. Quando reiniciávamos, sumiam.
+    Nesta etapa integramos o banco de dados MySQL — o <code style="font-family:var(--mono);color:var(--cyan)">frota_db</code>.
+    Os veículos, motoristas e oficinas passam a existir de verdade, mesmo depois de fechar o servidor.
+  </p>
+  <div class="concepts reveal reveal-3">
+    <span class="concept-tag db">MySQL</span>
+    <span class="concept-tag db">mysql2/promise</span>
+    <span class="concept-tag db">frota_db</span>
+    <span class="concept-tag db">Pool de conexões</span>
+    <span class="concept-tag db">Queries parametrizadas</span>
+  </div>
+</section>
+
+<div class="content">
+
+  <!-- ARQUITETURA -->
+  <div class="section reveal">
+    <div class="section-label">Arquitetura — onde estamos</div>
+    <div class="arch-diagram">
+      <div class="arch-box">
+        <div class="arch-label">Etapa 1–2</div>
+        <div class="arch-name">Front-end</div>
+      </div>
+      <div class="arch-arrow">→</div>
+      <div class="arch-box">
+        <div class="arch-label">Etapa 3–5</div>
+        <div class="arch-name">Express/MVC</div>
+      </div>
+      <div class="arch-arrow">→</div>
+      <div class="arch-box">
+        <div class="arch-label">Etapa 6</div>
+        <div class="arch-name">Auth</div>
+      </div>
+      <div class="arch-arrow">→</div>
+      <div class="arch-box active">
+        <div class="arch-label">Etapa atual</div>
+        <div class="arch-name">MySQL</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- O BANCO -->
+  <div class="section reveal">
+    <div class="section-label">O banco de dados do sistema</div>
+    <h2>O frota_db — 4 tabelas interligadas</h2>
+    <p>O mesmo banco que foi modelado na disciplina de Banco de Dados. Aqui, o Node.js se conecta a ele via <code style="font-family:var(--mono);color:var(--cyan)">mysql2</code>.</p>
+
+    <div class="er-diagram">
+      <div class="er-box">
+        <div class="er-box-name">VEICULO</div>
+        <div class="er-field"><span class="pk">PK</span> placa</div>
+        <div class="er-field">modelo</div>
+        <div class="er-field">ano</div>
+        <div class="er-field">km_atual</div>
+        <div class="er-field">status</div>
+      </div>
+      <div class="er-box">
+        <div class="er-box-name">MOTORISTA</div>
+        <div class="er-field"><span class="pk">PK</span> id</div>
+        <div class="er-field">nome</div>
+        <div class="er-field">cnh</div>
+        <div class="er-field">categoria_cnh</div>
+        <div class="er-field">validade_cnh</div>
+      </div>
+      <div class="er-box">
+        <div class="er-box-name">OFICINA</div>
+        <div class="er-field"><span class="pk">PK</span> id</div>
+        <div class="er-field">nome</div>
+        <div class="er-field">cidade</div>
+        <div class="er-field">telefone</div>
+        <div class="er-field">especialidade</div>
+      </div>
+      <div class="er-box">
+        <div class="er-box-name">MANUTENCAO</div>
+        <div class="er-field"><span class="pk">PK</span> id</div>
+        <div class="er-field"><span class="fk">FK</span> veiculo_placa</div>
+        <div class="er-field"><span class="fk">FK</span> oficina_id</div>
+        <div class="er-field">data_entrada</div>
+        <div class="er-field">custo</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CONEXÃO -->
+  <div class="section reveal">
+    <div class="section-label">Conceito — conexão com mysql2</div>
+    <h2>Pool de conexões — não uma conexão por vez</h2>
+    <p>Em vez de abrir e fechar uma conexão por requisição, usamos um <strong style="color:var(--cyan)">pool</strong> — um conjunto de conexões reutilizáveis. Mais eficiente, mais robusto.</p>
+
+    <div class="code-block">
+      <span class="file-label">middlewares/db.js</span>
+      <span class="k">const</span> mysql = <span class="f">require</span>(<span class="s">'mysql2/promise'</span>);<br>
+      <br>
+      <span class="k">const</span> db = mysql.<span class="f">createPool</span>({<br>
+      &nbsp;&nbsp;host:     process.env.DB_HOST,<br>
+      &nbsp;&nbsp;user:     process.env.DB_USER,<br>
+      &nbsp;&nbsp;password: process.env.DB_PASSWORD,<br>
+      &nbsp;&nbsp;database: <span class="s">'frota_db'</span>,<br>
+      &nbsp;&nbsp;connectionLimit: <span class="n">10</span>  <span class="c">// máximo de conexões simultâneas</span><br>
+      });<br>
+      <br>
+      module.exports = db;  <span class="c">// compartilhado por todos os models</span>
+    </div>
+  </div>
+
+  <!-- QUERIES -->
+  <div class="section reveal">
+    <div class="section-label">Conceito — queries no model</div>
+    <h2>O CRUD completo com mysql2</h2>
+
+    <div class="query-demo">
+      <div class="query-tab">
+        <button class="q-tab active" onclick="mudarQuery('select', this)">SELECT</button>
+        <button class="q-tab" onclick="mudarQuery('insert', this)">INSERT</button>
+        <button class="q-tab" onclick="mudarQuery('update', this)">UPDATE</button>
+        <button class="q-tab" onclick="mudarQuery('delete', this)">DELETE</button>
+      </div>
+
+      <div class="q-panel active" id="q-select">
+        <div class="code-block" style="border-radius:0 0 var(--radius) var(--radius)">
+          <span class="file-label">veiculoModel.js</span>
+          <span class="c">// busca todos os veículos ordenados</span><br>
+          <span class="k">const</span> listar = <span class="k">async</span> () => {<br>
+          &nbsp;&nbsp;<span class="k">const</span> [rows] = <span class="k">await</span> db.<span class="f">execute</span>(<br>
+          &nbsp;&nbsp;&nbsp;&nbsp;<span class="s">'SELECT * FROM VEICULO ORDER BY placa'</span><br>
+          &nbsp;&nbsp;);<br>
+          &nbsp;&nbsp;<span class="k">return</span> rows;  <span class="c">// array de objetos</span><br>
+          };
+        </div>
+      </div>
+
+      <div class="q-panel" id="q-insert">
+        <div class="code-block" style="border-radius:0 0 var(--radius) var(--radius)">
+          <span class="file-label">veiculoModel.js</span>
+          <span class="c">// ? são parâmetros — protegem contra SQL injection</span><br>
+          <span class="k">const</span> criar = <span class="k">async</span> ({ placa, modelo, ano, km_atual, status }) => {<br>
+          &nbsp;&nbsp;<span class="k">const</span> [result] = <span class="k">await</span> db.<span class="f">execute</span>(<br>
+          &nbsp;&nbsp;&nbsp;&nbsp;<span class="s">'INSERT INTO VEICULO (placa, modelo, ano, km_atual, status)'</span><br>
+          &nbsp;&nbsp;&nbsp;&nbsp;+ <span class="s">' VALUES (?, ?, ?, ?, ?)'</span>,<br>
+          &nbsp;&nbsp;&nbsp;&nbsp;[placa, modelo, ano, km_atual, status]<br>
+          &nbsp;&nbsp;);<br>
+          &nbsp;&nbsp;<span class="k">return</span> result.affectedRows;  <span class="c">// 1 se inserido</span><br>
+          };
+        </div>
+      </div>
+
+      <div class="q-panel" id="q-update">
+        <div class="code-block" style="border-radius:0 0 var(--radius) var(--radius)">
+          <span class="file-label">veiculoModel.js</span>
+          <span class="k">const</span> atualizar = <span class="k">async</span> (placa, { modelo, ano, km_atual, status }) => {<br>
+          &nbsp;&nbsp;<span class="k">const</span> [result] = <span class="k">await</span> db.<span class="f">execute</span>(<br>
+          &nbsp;&nbsp;&nbsp;&nbsp;<span class="s">'UPDATE VEICULO SET modelo=?, ano=?, km_atual=?, status=?'</span><br>
+          &nbsp;&nbsp;&nbsp;&nbsp;+ <span class="s">' WHERE placa=?'</span>,<br>
+          &nbsp;&nbsp;&nbsp;&nbsp;[modelo, ano, km_atual, status, placa]<br>
+          &nbsp;&nbsp;);<br>
+          &nbsp;&nbsp;<span class="k">return</span> result.affectedRows;  <span class="c">// 0 se não encontrou</span><br>
+          };
+        </div>
+      </div>
+
+      <div class="q-panel" id="q-delete">
+        <div class="code-block" style="border-radius:0 0 var(--radius) var(--radius)">
+          <span class="file-label">veiculoModel.js</span>
+          <span class="k">const</span> remover = <span class="k">async</span> (placa) => {<br>
+          &nbsp;&nbsp;<span class="k">const</span> [result] = <span class="k">await</span> db.<span class="f">execute</span>(<br>
+          &nbsp;&nbsp;&nbsp;&nbsp;<span class="s">'DELETE FROM VEICULO WHERE placa = ?'</span>,<br>
+          &nbsp;&nbsp;&nbsp;&nbsp;[placa]<br>
+          &nbsp;&nbsp;);<br>
+          &nbsp;&nbsp;<span class="k">return</span> result.affectedRows;<br>
+          };
+        </div>
+      </div>
+    </div>
+
+    <div class="callout danger">
+      <span class="callout-icon">🚨</span>
+      <span><strong>SQL Injection:</strong> nunca concatene valores do usuário diretamente na query. Use sempre <code style="font-family:var(--mono)">?</code> com mysql2 — ele escapa os valores automaticamente.</span>
+    </div>
+  </div>
+
+  <!-- DEMO REAL -->
+  <div class="section reveal">
+    <div class="section-label">Demo — dados reais do banco</div>
+    <h2>Veículos do frota_db no Railway</h2>
+    <p>Esses dados vêm do banco MySQL real. Cadastre um veículo — ele vai persistir no banco.</p>
+
+    <div class="demo-frame">
+      <div class="demo-toolbar">
+        <div class="demo-dot red"></div>
+        <div class="demo-dot yellow"></div>
+        <div class="demo-dot green"></div>
+        <div class="demo-url">mysql://frota_db · Railway</div>
+      </div>
+      <div class="demo-body">
+        <div style="display:flex;gap:0.6rem;margin-bottom:1rem;flex-wrap:wrap">
+          <button class="btn btn-primary" onclick="carregarVeiculos()">↻ Atualizar</button>
+          <button class="btn btn-ghost" onclick="toggleForm()">+ Novo veículo</button>
+        </div>
+
+        <div id="form-novo" style="display:none;background:rgba(15,31,61,0.5);border:1px solid rgba(255,255,255,0.06);border-radius:var(--radius);padding:1rem;margin-bottom:1rem">
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.6rem">
+            <div><label>Placa</label><input id="f-placa" placeholder="XYZ-9999"></div>
+            <div><label>Modelo</label><input id="f-modelo" placeholder="Volkswagen Delivery"></div>
+            <div><label>Ano</label><input id="f-ano" type="number" placeholder="2024"></div>
+            <div><label>Km Atual</label><input id="f-km" type="number" placeholder="0"></div>
+          </div>
+          <label>Status</label>
+          <select id="f-status">
+            <option value="ativo">Ativo</option>
+            <option value="manutencao">Manutenção</option>
+            <option value="inativo">Inativo</option>
+          </select>
+          <div style="display:flex;gap:0.5rem;margin-top:0.5rem">
+            <button class="btn btn-primary" onclick="salvar()">Salvar no banco</button>
+            <button class="btn btn-ghost" onclick="toggleForm()">Cancelar</button>
+          </div>
+        </div>
+
+        <table class="data-table">
+          <thead>
+            <tr><th>Placa</th><th>Modelo</th><th>Ano</th><th>Km</th><th>Status</th><th></th></tr>
+          </thead>
+          <tbody id="tbody-u7">
+            <tr><td colspan="6" class="loading">Carregando do banco</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="callout ok">
+      <span class="callout-icon">✅</span>
+      <span><strong>O que aprendemos:</strong> mysql2/promise, createPool, execute(), queries parametrizadas com ?, affectedRows, integração Model ↔ Controller, e persistência de dados além do ciclo de vida do servidor.</span>
+    </div>
+  </div>
+
+</div>
+
+<div class="unit-nav">
+  <a href="../u6/index.html">← Etapa 06 — Quem pode entrar?</a>
+  <a href="../u8/index.html">Etapa 08 — O sistema completo →</a>
+</div>
+
+<footer>IFCE · DW2 · Etapa 07 de 08</footer>
+
+<script>
+const API = 'https://gestao-frota-api.up.railway.app/api/v1';
+
+function badge(s) {
+  const label = s === 'manutencao' ? 'Manutenção' : s.charAt(0).toUpperCase() + s.slice(1);
+  return `<span class="badge ${s}">${label}</span>`;
+}
+
+async function carregarVeiculos() {
+  const tbody = document.getElementById('tbody-u7');
+  tbody.innerHTML = '<tr><td colspan="6" class="loading">Buscando no banco</td></tr>';
+  try {
+    const res = await fetch(`${API}/veiculos`);
+    const lista = await res.json();
+    tbody.innerHTML = lista.map(v => `
+      <tr>
+        <td style="font-family:var(--mono);font-size:0.78rem">${v.placa}</td>
+        <td>${v.modelo}</td>
+        <td>${v.ano}</td>
+        <td style="font-family:var(--mono);font-size:0.78rem">${Number(v.km_atual).toLocaleString('pt-BR')} km</td>
+        <td>${badge(v.status)}</td>
+        <td><button onclick="excluir('${v.placa}')" style="background:rgba(224,82,82,0.15);border:1px solid rgba(224,82,82,0.3);color:#E05252;font-family:var(--mono);font-size:0.62rem;padding:0.2rem 0.5rem;border-radius:3px;cursor:pointer">excluir</button></td>
+      </tr>`).join('') || '<tr><td colspan="6" class="loading">Nenhum veículo cadastrado</td></tr>';
+  } catch {
+    tbody.innerHTML = '<tr><td colspan="6" class="loading">API offline — verifique o Railway</td></tr>';
+  }
+}
+
+async function salvar() {
+  const body = {
+    placa: document.getElementById('f-placa').value,
+    modelo: document.getElementById('f-modelo').value,
+    ano: parseInt(document.getElementById('f-ano').value),
+    km_atual: parseInt(document.getElementById('f-km').value) || 0,
+    status: document.getElementById('f-status').value
+  };
+  if (!body.placa || !body.modelo || !body.ano) return alert('Preencha placa, modelo e ano.');
+  try {
+    const res = await fetch(`${API}/veiculos`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body)
+    });
+    if (res.ok) { toggleForm(); carregarVeiculos(); }
+    else { const d = await res.json(); alert(d.erro || 'Erro ao salvar'); }
+  } catch { alert('API offline'); }
+}
+
+async function excluir(placa) {
+  if (!confirm(`Excluir ${placa}?`)) return;
+  await fetch(`${API}/veiculos/${placa}`, { method: 'DELETE' });
+  carregarVeiculos();
+}
+
+function toggleForm() {
+  const f = document.getElementById('form-novo');
+  f.style.display = f.style.display === 'none' ? 'block' : 'none';
+}
+
+function mudarQuery(id, btn) {
+  document.querySelectorAll('.q-tab').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.q-panel').forEach(p => p.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('q-' + id).classList.add('active');
+}
+
+carregarVeiculos();
+</script>
+</body>
+</html>
