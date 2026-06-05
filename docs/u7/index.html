@@ -307,7 +307,7 @@
         <div class="demo-dot red"></div>
         <div class="demo-dot yellow"></div>
         <div class="demo-dot green"></div>
-        <div class="demo-url">mysql://frota_db · Railway</div>
+        <div class="demo-url">frota_db · simulado [dados em memória]</div>
       </div>
       <div class="demo-body">
         <div style="display:flex;gap:0.6rem;margin-bottom:1rem;flex-wrap:wrap">
@@ -345,6 +345,11 @@
       </div>
     </div>
 
+    <div class="callout warn">
+      <span class="callout-icon">🧪</span>
+      <span><strong>Ambiente demonstrativo:</strong> os dados vivem em memória JavaScript. Ao recarregar a página, voltam ao estado inicial — exatamente como seria sem banco de dados. No projeto real, cada operação executa uma query SQL no banco via <code style="font-family:var(--mono)">mysql2</code>.</span>
+    </div>
+
     <div class="callout ok">
       <span class="callout-icon">✅</span>
       <span><strong>O que aprendemos:</strong> mysql2/promise, createPool, execute(), queries parametrizadas com ?, affectedRows, integração Model ↔ Controller, e persistência de dados além do ciclo de vida do servidor.</span>
@@ -361,56 +366,55 @@
 <footer>IFCE · DW2 · Etapa 07 de 08</footer>
 
 <script>
-const API = 'https://gestao-frota-api.up.railway.app/api/v1';
+// ── DADOS SIMULADOS ──────────────────────────────────────────
+// Em produção, cada operação abaixo faria uma chamada à API Node.js
+// que executaria a query correspondente no banco MySQL/PostgreSQL.
+
+const VEICULOS = [
+  { placa: 'ABC-1234', modelo: 'Fiat Ducato',          ano: 2021, km_atual: 48200,  status: 'ativo' },
+  { placa: 'DEF-5678', modelo: 'Mercedes Sprinter',    ano: 2019, km_atual: 112400, status: 'manutencao' },
+  { placa: 'GHI-9012', modelo: 'Volkswagen Delivery',  ano: 2022, km_atual: 21800,  status: 'ativo' },
+  { placa: 'JKL-3456', modelo: 'Ford Cargo',           ano: 2017, km_atual: 198000, status: 'inativo' },
+  { placa: 'MNO-7890', modelo: 'Iveco Daily',          ano: 2020, km_atual: 67300,  status: 'ativo' }
+];
 
 function badge(s) {
-  const label = s === 'manutencao' ? 'Manutenção' : s.charAt(0).toUpperCase() + s.slice(1);
-  return `<span class="badge ${s}">${label}</span>`;
+  const l = s === 'manutencao' ? 'Manutenção' : s.charAt(0).toUpperCase() + s.slice(1);
+  return `<span class="badge ${s}">${l}</span>`;
 }
 
-async function carregarVeiculos() {
+function carregarVeiculos() {
   const tbody = document.getElementById('tbody-u7');
-  tbody.innerHTML = '<tr><td colspan="6" class="loading">Buscando no banco</td></tr>';
-  try {
-    const res = await fetch(`${API}/veiculos`);
-    const lista = await res.json();
-    tbody.innerHTML = lista.map(v => `
-      <tr>
-        <td style="font-family:var(--mono);font-size:0.78rem">${v.placa}</td>
-        <td>${v.modelo}</td>
-        <td>${v.ano}</td>
-        <td style="font-family:var(--mono);font-size:0.78rem">${Number(v.km_atual).toLocaleString('pt-BR')} km</td>
-        <td>${badge(v.status)}</td>
-        <td><button onclick="excluir('${v.placa}')" style="background:rgba(224,82,82,0.15);border:1px solid rgba(224,82,82,0.3);color:#E05252;font-family:var(--mono);font-size:0.62rem;padding:0.2rem 0.5rem;border-radius:3px;cursor:pointer">excluir</button></td>
-      </tr>`).join('') || '<tr><td colspan="6" class="loading">Nenhum veículo cadastrado</td></tr>';
-  } catch {
-    tbody.innerHTML = '<tr><td colspan="6" class="loading">API offline — verifique o Railway</td></tr>';
-  }
+  tbody.innerHTML = VEICULOS.map(v => `
+    <tr>
+      <td style="font-family:var(--mono);font-size:0.78rem">${v.placa}</td>
+      <td>${v.modelo}</td>
+      <td>${v.ano}</td>
+      <td style="font-family:var(--mono);font-size:0.78rem">${Number(v.km_atual).toLocaleString('pt-BR')} km</td>
+      <td>${badge(v.status)}</td>
+      <td><button onclick="excluir('${v.placa}')" style="background:rgba(224,82,82,0.15);border:1px solid rgba(224,82,82,0.3);color:#E05252;font-family:var(--mono);font-size:0.62rem;padding:0.2rem 0.5rem;border-radius:3px;cursor:pointer">excluir</button></td>
+    </tr>`).join('') || '<tr><td colspan="6" class="loading">Nenhum veículo</td></tr>';
 }
 
-async function salvar() {
-  const body = {
-    placa: document.getElementById('f-placa').value,
-    modelo: document.getElementById('f-modelo').value,
-    ano: parseInt(document.getElementById('f-ano').value),
-    km_atual: parseInt(document.getElementById('f-km').value) || 0,
-    status: document.getElementById('f-status').value
-  };
-  if (!body.placa || !body.modelo || !body.ano) return alert('Preencha placa, modelo e ano.');
-  try {
-    const res = await fetch(`${API}/veiculos`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(body)
-    });
-    if (res.ok) { toggleForm(); carregarVeiculos(); }
-    else { const d = await res.json(); alert(d.erro || 'Erro ao salvar'); }
-  } catch { alert('API offline'); }
+function salvar() {
+  const placa  = document.getElementById('f-placa').value.trim().toUpperCase();
+  const modelo = document.getElementById('f-modelo').value.trim();
+  const ano    = parseInt(document.getElementById('f-ano').value);
+  const km     = parseInt(document.getElementById('f-km').value) || 0;
+  const status = document.getElementById('f-status').value;
+
+  if (!placa || !modelo || !ano) return alert('Preencha placa, modelo e ano.');
+  if (VEICULOS.find(v => v.placa === placa)) return alert('Placa já cadastrada.');
+
+  VEICULOS.push({ placa, modelo, ano, km_atual: km, status });
+  toggleForm();
+  carregarVeiculos();
 }
 
-async function excluir(placa) {
+function excluir(placa) {
   if (!confirm(`Excluir ${placa}?`)) return;
-  await fetch(`${API}/veiculos/${placa}`, { method: 'DELETE' });
+  const idx = VEICULOS.findIndex(v => v.placa === placa);
+  if (idx > -1) VEICULOS.splice(idx, 1);
   carregarVeiculos();
 }
 

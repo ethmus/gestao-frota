@@ -305,7 +305,12 @@
   <div class="section reveal">
     <div class="section-label">Demo — API em funcionamento</div>
     <h2>Teste os endpoints da nossa API</h2>
-    <p>Selecione um endpoint abaixo e clique em Enviar. A requisição vai para a API real no Railway.</p>
+    <p>Selecione um endpoint e clique em Enviar. As respostas são simuladas — idênticas ao que a API Express retornaria em produção.</p>
+
+    <div class="callout warn" style="margin-bottom:1rem">
+      <span class="callout-icon">🧪</span>
+      <span><strong>Ambiente demonstrativo:</strong> os dados são simulados localmente. Em produção, cada clique faria uma requisição HTTP real ao servidor Node.js.</span>
+    </div>
 
     <div class="endpoint-tester">
       <div class="et-header">
@@ -348,24 +353,42 @@
 <footer>IFCE · DW2 · Etapa 04 de 08</footer>
 
 <script>
-const API = 'https://gestao-frota-api.up.railway.app';
+const DADOS_SIMULADOS = {
+  '/api/v1/veiculos': [
+    { placa: 'ABC-1234', modelo: 'Fiat Ducato',          ano: 2021, km_atual: 48200,  status: 'ativo' },
+    { placa: 'DEF-5678', modelo: 'Mercedes Sprinter',    ano: 2019, km_atual: 112400, status: 'manutencao' },
+    { placa: 'GHI-9012', modelo: 'Volkswagen Delivery',  ano: 2022, km_atual: 21800,  status: 'ativo' },
+    { placa: 'JKL-3456', modelo: 'Ford Cargo',           ano: 2017, km_atual: 198000, status: 'inativo' },
+    { placa: 'MNO-7890', modelo: 'Iveco Daily',          ano: 2020, km_atual: 67300,  status: 'ativo' }
+  ],
+  '/api/v1/veiculos/ABC-1234': { placa: 'ABC-1234', modelo: 'Fiat Ducato', ano: 2021, km_atual: 48200, status: 'ativo' },
+  '/api/v1/motoristas': [
+    { id: 1, nome: 'Carlos Silva',   cnh: '12345678901', categoria_cnh: 'D', validade_cnh: '2026-08-15' },
+    { id: 2, nome: 'Ana Souza',      cnh: '98765432100', categoria_cnh: 'C', validade_cnh: '2025-12-01' },
+    { id: 3, nome: 'Pedro Oliveira', cnh: '55544433322', categoria_cnh: 'E', validade_cnh: '2027-03-20' }
+  ],
+  '/api/v1/oficinas': [
+    { id: 1, nome: 'Oficina Central',    cidade: 'Fortaleza', telefone: '(85) 3333-1111', especialidade: 'Mecânica Geral' },
+    { id: 2, nome: 'Auto Center Norte',  cidade: 'Fortaleza', telefone: '(85) 3333-2222', especialidade: 'Elétrica' },
+    { id: 3, nome: 'Borracharia Rápida', cidade: 'Caucaia',   telefone: '(85) 3333-3333', especialidade: 'Pneus e Suspensão' }
+  ],
+  '/': { status: 'ok', sistema: 'Gestão de Frota API', versao: '1.0.0' }
+};
 
 async function testarEndpoint() {
   const endpoint = document.getElementById('et-endpoint').value;
   const box = document.getElementById('et-response');
-  box.textContent = '// aguardando resposta...';
+  box.textContent = '// processando...';
   box.style.color = 'var(--text-dim)';
+
+  // simula latência de rede
   const t0 = Date.now();
-  try {
-    const res = await fetch(API + endpoint);
-    const data = await res.json();
-    const ms = Date.now() - t0;
-    box.style.color = res.ok ? 'var(--green)' : 'var(--red)';
-    box.textContent = `// HTTP ${res.status} · ${ms}ms\n\n${JSON.stringify(data, null, 2)}`;
-  } catch (err) {
-    box.style.color = 'var(--red)';
-    box.textContent = `// Erro: ${err.message}\n// Verifique se a API está online no Railway`;
-  }
+  await new Promise(r => setTimeout(r, 180 + Math.random() * 120));
+  const ms = Date.now() - t0;
+
+  const data = DADOS_SIMULADOS[endpoint];
+  box.style.color = 'var(--green)';
+  box.textContent = `// HTTP 200 · ${ms}ms  [simulado]\n\n${JSON.stringify(data, null, 2)}`;
 }
 </script>
 </body>

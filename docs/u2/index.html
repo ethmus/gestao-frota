@@ -242,7 +242,12 @@
 
     <div class="callout tip">
       <span class="callout-icon">💡</span>
-      <span>Abra o DevTools (F12 → aba Network) e clique no botão. Você verá a requisição real sendo feita, o tempo de resposta e o JSON recebido — exatamente como em produção.</span>
+      <span>Abra o DevTools (F12 → aba Network) e clique no botão. Em produção você veria a requisição real, o tempo de resposta e o JSON recebido.</span>
+    </div>
+
+    <div class="callout warn">
+      <span class="callout-icon">🧪</span>
+      <span><strong>Ambiente demonstrativo:</strong> os dados exibidos são simulados localmente em JavaScript. No projeto real, o <code style="font-family:var(--mono)">fetch()</code> busca os veículos de uma API Node.js conectada ao banco de dados.</span>
     </div>
   </div>
 
@@ -268,8 +273,6 @@
 <footer>IFCE · DW2 · Etapa 02 de 08</footer>
 
 <script>
-const API = 'https://gestao-frota-api.up.railway.app/api/v1';
-
 const dadosFake = [
   { placa: 'ABC-1234', modelo: 'Fiat Ducato',         ano: 2021, km_atual: 48200,  status: 'ativo' },
   { placa: 'DEF-5678', modelo: 'Mercedes Sprinter',   ano: 2019, km_atual: 112400, status: 'manutencao' },
@@ -337,17 +340,8 @@ async function simularFetch(sucesso) {
   document.getElementById('req-1-status').textContent = 'concluído';
   document.getElementById('req-1').classList.add('done');
 
-  try {
-    const res = await fetch(`${API}/veiculos`);
-    if (res.ok) {
-      const dados = await res.json();
-      renderizar(dados);
-    } else {
-      renderizar(dadosFake);
-    }
-  } catch {
-    renderizar(dadosFake);
-  }
+  // Dados simulados — em produção este seria o retorno real da API
+  renderizar(dadosFake);
 }
 </script>
 </body>

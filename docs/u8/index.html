@@ -209,6 +209,11 @@
     <div class="section-label">O sistema funcionando</div>
     <h2>Todas as entidades em um único lugar</h2>
 
+    <div class="callout warn" style="margin-bottom:1rem">
+      <span class="callout-icon">🧪</span>
+      <span><strong>Ambiente demonstrativo:</strong> dados simulados em memória. No sistema em produção, cada aba faz uma requisição à API Express que consulta o banco PostgreSQL/MySQL.</span>
+    </div>
+
     <div class="tabs-u8">
       <button class="tab-u8 active" onclick="mudarTab('veiculos', this)">🚛 Veículos</button>
       <button class="tab-u8" onclick="mudarTab('motoristas', this)">👤 Motoristas</button>
@@ -339,28 +344,41 @@
 <footer>IFCE · DW2 · Etapa 08 de 08 · Fim da jornada</footer>
 
 <script>
-const API = 'https://gestao-frota-api.up.railway.app/api/v1';
+const DADOS = {
+  veiculos: [
+    { placa: 'ABC-1234', modelo: 'Fiat Ducato',          ano: 2021, km_atual: 48200,  status: 'ativo' },
+    { placa: 'DEF-5678', modelo: 'Mercedes Sprinter',    ano: 2019, km_atual: 112400, status: 'manutencao' },
+    { placa: 'GHI-9012', modelo: 'Volkswagen Delivery',  ano: 2022, km_atual: 21800,  status: 'ativo' },
+    { placa: 'JKL-3456', modelo: 'Ford Cargo',           ano: 2017, km_atual: 198000, status: 'inativo' },
+    { placa: 'MNO-7890', modelo: 'Iveco Daily',          ano: 2020, km_atual: 67300,  status: 'ativo' }
+  ],
+  motoristas: [
+    { id: 1, nome: 'Carlos Silva',   cnh: '12345678901', categoria_cnh: 'D', validade_cnh: '2026-08-15' },
+    { id: 2, nome: 'Ana Souza',      cnh: '98765432100', categoria_cnh: 'C', validade_cnh: '2025-12-01' },
+    { id: 3, nome: 'Pedro Oliveira', cnh: '55544433322', categoria_cnh: 'E', validade_cnh: '2027-03-20' }
+  ],
+  oficinas: [
+    { id: 1, nome: 'Oficina Central',    cidade: 'Fortaleza', telefone: '(85) 3333-1111', especialidade: 'Mecânica Geral' },
+    { id: 2, nome: 'Auto Center Norte',  cidade: 'Fortaleza', telefone: '(85) 3333-2222', especialidade: 'Elétrica' },
+    { id: 3, nome: 'Borracharia Rápida', cidade: 'Caucaia',   telefone: '(85) 3333-3333', especialidade: 'Pneus e Suspensão' }
+  ]
+};
 
 function badge(s) {
   const l = s === 'manutencao' ? 'Manutenção' : s.charAt(0).toUpperCase() + s.slice(1);
   return `<span class="badge ${s}">${l}</span>`;
 }
 
-async function carregar(entidade, tbId, colunas) {
+function carregar(entidade, tbId, colunas) {
   const tb = document.getElementById(tbId);
-  try {
-    const res = await fetch(`${API}/${entidade}`);
-    const lista = await res.json();
-    tb.innerHTML = lista.map(item => `<tr>${colunas.map(c => {
-      const val = item[c];
-      if (c === 'status') return `<td>${badge(val)}</td>`;
-      if (c === 'km_atual') return `<td style="font-family:var(--mono);font-size:0.78rem">${Number(val).toLocaleString('pt-BR')} km</td>`;
-      if (c === 'placa' || c === 'cnh') return `<td style="font-family:var(--mono);font-size:0.78rem">${val}</td>`;
-      return `<td>${val || '—'}</td>`;
-    }).join('')}</tr>`).join('') || `<tr><td colspan="${colunas.length}" class="loading">Nenhum registro</td></tr>`;
-  } catch {
-    tb.innerHTML = `<tr><td colspan="${colunas.length}" class="loading">API offline</td></tr>`;
-  }
+  const lista = DADOS[entidade] || [];
+  tb.innerHTML = lista.map(item => `<tr>${colunas.map(c => {
+    const val = item[c];
+    if (c === 'status')   return `<td>${badge(val)}</td>`;
+    if (c === 'km_atual') return `<td style="font-family:var(--mono);font-size:0.78rem">${Number(val).toLocaleString('pt-BR')} km</td>`;
+    if (c === 'placa' || c === 'cnh') return `<td style="font-family:var(--mono);font-size:0.78rem">${val}</td>`;
+    return `<td>${val || '—'}</td>`;
+  }).join('')}</tr>`).join('') || `<tr><td colspan="${colunas.length}" class="loading">Nenhum registro</td></tr>`;
 }
 
 function mudarTab(nome, btn) {
@@ -373,7 +391,6 @@ function mudarTab(nome, btn) {
   if (nome === 'oficinas')   carregar('oficinas',   'tb-oficinas',   ['nome','cidade','telefone','especialidade']);
 }
 
-// Carregar inicial
 carregar('veiculos', 'tb-veiculos', ['placa','modelo','ano','km_atual','status']);
 </script>
 </body>
